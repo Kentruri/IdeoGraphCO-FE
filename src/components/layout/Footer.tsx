@@ -20,7 +20,7 @@ export function Footer() {
               <li key={category.slug}>
                 <Link
                   href={`/fuentes/${category.slug}`}
-                  className="text-muted-foreground transition-colors hover:text-foreground"
+                  className="rounded-sm text-muted-foreground outline-none transition-colors duration-150 ease-swift hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
                 >
                   {category.label}
                 </Link>

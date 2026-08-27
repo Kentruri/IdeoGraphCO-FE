@@ -115,3 +115,54 @@
 5. **[P2] `/impeccable layout`**: portada (P2-3), tarjetas (P2-5, P2-6), paginación (P2-4), búsqueda (P2-8).
 6. **[P2] Base de `prefers-reduced-motion`** antes del motion pass de fase 4 (P2-9).
 7. **[P3] `/impeccable polish`**: skeletons, breadcrumbs, detalles finales.
+
+---
+
+# Re-auditoría — Fase 5 (post-refactor)
+
+**Fecha:** 2026-08-26 · Mismo método de la fase 1. Detector mecánico: 0 hallazgos. `yarn build` ✅ · `yarn lint` ✅.
+
+## Puntuación de salud (antes → después)
+
+| # | Dimensión | Antes | Después | Evidencia |
+|---|-----------|-------|---------|-----------|
+| 1 | Accesibilidad | 2/4 | 3/4 | Tooltips Radix enfocables en la leyenda; h2 en tarjetas de listado; `focus-visible:ring` en tarjetas, nav, footer, migas y leyenda; `aria-live` en resultados de búsqueda; objetivos táctiles de 44px; `motion-safe`/reduced-motion en todo el movimiento. Pendiente menor: skip-link. |
+| 2 | Rendimiento | 3/4 | 4/4 | Barras con `transform: scaleX` + `@starting-style` (sin layout); solo se animan transform/opacity/color; stagger en CSS puro. |
+| 3 | Diseño responsive | 3/4 | 4/4 | Paginación con `flex-wrap` y 44px en táctil; meta de tarjetas con `flex-wrap`; verificado hasta 320px. |
+| 4 | Theming | 2/4 | 4/4 | Cero valores mágicos: `--spacing-header`, `--spacing-aside`, `--ease-swift/smooth/drawer`, `--animate-fade-up`; un solo token de titulares (`--font-heading` → Newsreader); paleta recalibrada OKLCH en ambos temas. |
+| 5 | Integridad de implementación | 2/4 | 3/4 | Dirección propia "sala de redacción de datos" (docs/design-system.md): Newsreader+Geist+Geist Mono, cromo tinta sin acento político, leyenda de 8 clases como firma de portada, cifras en mono. La estructura de grid de tarjetas sigue siendo convencional (decisión: es UI Operate, no landing). |
+| **Total** | | **12/20** | **18/20** | **Excelente — pulido menor pendiente** |
+
+## Cierre de hallazgos de la fase 1
+
+- **P1-1 identidad genérica** → cerrado (sistema propio, fase 2).
+- **P1-2 tooltips `title`** → cerrado (`IdeologyLegend` con Radix Tooltip; `title` eliminado de badge/strip/distribution; descripciones visibles en el detalle).
+- **P1-3 jerarquía h1→h3** → cerrado (titulares de tarjeta ahora h2).
+- **P1-4 animación de `width`** → cerrado (`scaleX` + origin-left).
+- **P1-5 foco invisible en tarjetas** → cerrado (`focus-within:ring` en Card).
+- **P1-6 feedback incoherente** → cerrado (`States.tsx` con CVA, icono contextual por página, tono destructivo en error).
+- **P2-1 valores mágicos** → cerrado (tokens `@theme`).
+- **P2-2 doble sistema tipográfico** → cerrado (`font-heading` único).
+- **P2-3 portada sin momento** → cerrado (display 5xl con `text-balance` + leyenda interactiva).
+- **P2-4 objetivos táctiles** → cerrado (44px en táctil).
+- **P2-5 triple hover** → cerrado (elevación + zoom sutil; sin subrayado).
+- **P2-6 pie de tarjeta** → cerrado (meta unificada arriba con `<time>`; badge + franja abajo).
+- **P2-7 "Sin imagen"** → cerrado (nombre del medio en Newsreader itálica como placeholder tipográfico).
+- **P2-8 búsqueda sin affordance** → cerrado (botón de envío visible, deshabilitado con query vacía).
+- **P2-9 reduced-motion** → cerrado (variantes `motion-safe:` + overrides globales para sheet y scroll).
+- **P3-1 skeleton del panel** → cerrado (CardHeader reflejado).
+- **P3-2 migas en categorías** → cerrado (breadcrumb Portada → categoría).
+- **P3-3 `outline-ring/50` global** → se mantiene (inocuo; los anillos explícitos lo pisan).
+
+## Endurecimiento adicional (fase 5)
+
+- Paginación envuelve en viewports de 320px (evita scroll horizontal).
+- Eyebrow "Fuentes" eliminado (regla del craft floor); reemplazado por miga de pan.
+- Etiquetas largas ("Institucionalismo") verificadas en badges, leyenda y columna de 9rem de la distribución.
+- El morph del ThemeToggle y las entradas del sheet conservan el cambio de estado bajo reduced-motion (instantáneo, nunca invisible).
+
+## Pendientes conscientes (fuera de alcance)
+
+- Skip-link "Saltar al contenido".
+- `EmptyState`/`ErrorState` podrían ofrecer variantes ilustradas propias.
+- La distribución del detalle podría ofrecer comparación entre pares opuestos (`OPPOSITE_PAIRS`) — requiere decisión de producto.

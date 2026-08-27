@@ -49,7 +49,10 @@ export function PaginationControls({
   return (
     <nav
       aria-label="Paginación de noticias"
-      className={cn("flex items-center justify-center gap-1", className)}
+      className={cn(
+        "flex flex-wrap items-center justify-center gap-1",
+        className
+      )}
     >
       {/* size-11 (44px) en táctil, size-9 desde sm (objetivo táctil AAA). */}
       <Button
