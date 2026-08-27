@@ -32,7 +32,8 @@ export function Navbar() {
               <Menu className="size-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-80">
+          {/* Curva de drawer (iOS) en lugar del ease-in-out genérico. */}
+          <SheetContent side="left" className="w-80 duration-300 ease-drawer">
             <SheetHeader>
               <SheetTitle className="font-heading text-xl">
                 {SITE_NAME}

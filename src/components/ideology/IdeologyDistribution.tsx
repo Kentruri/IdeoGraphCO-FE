@@ -32,7 +32,7 @@ export function IdeologyDistribution({
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      {rows.map((ideologyClass) => {
+      {rows.map((ideologyClass, index) => {
         const meta = IDEOLOGY_META[ideologyClass];
         const probability = probabilities[ideologyClass];
         const isPredicted = ideologyClass === predicted;
@@ -59,13 +59,16 @@ export function IdeologyDistribution({
             </span>
             <div className="h-1.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full origin-left rounded-full motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-swift"
-                style={{
-                  // Escala relativa al máximo para que la barra líder ocupe
-                  // todo el riel y las demás se lean en proporción.
-                  transform: `scaleX(${probability / maxProbability})`,
-                  backgroundColor: meta.cssVar,
-                }}
+                className="ideology-bar h-full rounded-full"
+                style={
+                  {
+                    // Escala relativa al máximo para que la barra líder ocupe
+                    // todo el riel y las demás se lean en proporción.
+                    "--bar-scale": probability / maxProbability,
+                    "--bar-delay": `${index * 45}ms`,
+                    backgroundColor: meta.cssVar,
+                  } as React.CSSProperties
+                }
               />
             </div>
             <span

@@ -30,7 +30,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-swift motion-safe:group-hover:scale-[1.03]"
+              className="object-cover motion-safe:transition-transform motion-safe:duration-250 motion-safe:ease-swift motion-safe:group-hover:scale-[1.03]"
             />
           ) : (
             <div className="flex h-full items-center justify-center font-heading text-2xl italic text-muted-foreground/60">

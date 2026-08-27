@@ -33,7 +33,7 @@ export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
               fill
               priority
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-swift motion-safe:group-hover:scale-[1.02]"
+              className="object-cover motion-safe:transition-transform motion-safe:duration-250 motion-safe:ease-swift motion-safe:group-hover:scale-[1.02]"
             />
           ) : (
             <div className="flex h-full items-center justify-center font-heading text-3xl italic text-muted-foreground/60">
