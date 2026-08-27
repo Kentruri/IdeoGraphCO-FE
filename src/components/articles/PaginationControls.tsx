@@ -54,16 +54,16 @@ export function PaginationControls({
         className
       )}
     >
-      {/* size-11 (44px) en táctil, size-9 desde sm (objetivo táctil AAA). */}
+      {/* size-11 (44px) en táctil, size-10 desde sm (objetivo táctil AAA). */}
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="size-11 sm:size-9"
+        className="size-11 rounded-none sm:size-10"
         aria-label="Página anterior"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
       >
-        <ChevronLeft className="size-4" />
+        <ChevronLeft className="size-4 motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out-expo motion-safe:group-hover/button:-translate-x-0.5" />
       </Button>
 
       {getVisiblePages(page, totalPages).map((value, index) =>
@@ -71,16 +71,16 @@ export function PaginationControls({
           <span
             key={`ellipsis-${index}`}
             aria-hidden
-            className="px-2 text-sm text-muted-foreground"
+            className="px-2 font-mono text-sm text-muted-foreground"
           >
             …
           </span>
         ) : (
           <Button
             key={value}
-            variant={value === page ? "default" : "outline"}
+            variant={value === page ? "default" : "ghost"}
             size="icon"
-            className="size-11 font-mono text-sm tabular-nums sm:size-9"
+            className="size-11 rounded-none font-mono text-sm tabular-nums sm:size-10"
             aria-label={`Página ${value}`}
             aria-current={value === page ? "page" : undefined}
             onClick={() => onPageChange(value)}
@@ -91,14 +91,14 @@ export function PaginationControls({
       )}
 
       <Button
-        variant="outline"
+        variant="ghost"
         size="icon"
-        className="size-11 sm:size-9"
+        className="size-11 rounded-none sm:size-10"
         aria-label="Página siguiente"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}
       >
-        <ChevronRight className="size-4" />
+        <ChevronRight className="size-4 motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out-expo motion-safe:group-hover/button:translate-x-0.5" />
       </Button>
     </nav>
   );

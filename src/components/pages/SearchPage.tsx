@@ -1,14 +1,12 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, SearchX } from "lucide-react";
 
 import { ArticleGrid } from "@/components/articles/ArticleGrid";
 import { PaginationControls } from "@/components/articles/PaginationControls";
 import { EmptyState, ErrorState } from "@/components/feedback/States";
 import { SearchBar } from "@/components/search/SearchBar";
 import { ArticleGridSkeleton } from "@/components/skeletons/ArticleCardSkeleton";
-import { Separator } from "@/components/ui/separator";
 import { useGetArticlesQuery } from "@/store/services/articles.api";
 
 const PAGE_SIZE = 9;
@@ -25,26 +23,24 @@ export function SearchPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-      <section className="mb-8 space-y-4">
-        <h1 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
-          Buscar noticias
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
+      <section className="space-y-8">
+        <h1 className="font-display text-5xl font-extrabold uppercase leading-none tracking-tight motion-safe:animate-fade-up md:font-stretch-expanded md:text-7xl">
+          Buscar
         </h1>
         <SearchBar
           key={query}
           initialQuery={query}
-          className="max-w-xl"
+          size="hero"
+          className="max-w-2xl motion-safe:animate-fade-up motion-safe:[animation-delay:100ms]"
           placeholder="Título, subtítulo, medio o palabra clave…"
         />
         {query && (
-          <p aria-live="polite" className="text-sm text-muted-foreground">
-            Resultados para <span className="font-medium">«{query}»</span>
+          <p aria-live="polite" className="font-mono text-sm text-muted-foreground">
+            «{query}»
             {data ? (
               <>
-                :{" "}
-                <span className="font-mono tabular-nums">
-                  {data.totalItems}
-                </span>{" "}
+                {" "}· <span className="tabular-nums">{data.totalItems}</span>{" "}
                 coincidencias
               </>
             ) : null}
@@ -52,44 +48,42 @@ export function SearchPage() {
         )}
       </section>
 
-      <Separator className="mb-8" />
-
-      {!query && (
-        <EmptyState
-          icon={Search}
-          title="Escribe un término para buscar"
-          description="Puedes buscar por título, subtítulo, nombre del medio o palabras clave."
-        />
-      )}
-
-      {query && isLoading && <ArticleGridSkeleton count={PAGE_SIZE} />}
-
-      {query && isError && <ErrorState onRetry={refetch} />}
-
-      {query && data && data.items.length === 0 && (
-        <EmptyState
-          icon={SearchX}
-          title={`Sin resultados para «${query}»`}
-          description="Intenta con otro término o revisa la ortografía."
-        />
-      )}
-
-      {query && data && data.items.length > 0 && (
-        <div className="space-y-10">
-          <ArticleGrid articles={data.items} />
-          <PaginationControls
-            page={data.page}
-            totalPages={data.totalPages}
-            onPageChange={(newPage) =>
-              router.push(
-                `/buscar?q=${encodeURIComponent(query)}${
-                  newPage === 1 ? "" : `&pagina=${newPage}`
-                }`
-              )
-            }
+      <div className="mt-12">
+        {!query && (
+          <EmptyState
+            title="Escribe un término para buscar"
+            description="Puedes buscar por título, subtítulo, nombre del medio o palabras clave."
           />
-        </div>
-      )}
+        )}
+
+        {query && isLoading && <ArticleGridSkeleton count={PAGE_SIZE} />}
+
+        {query && isError && <ErrorState onRetry={refetch} />}
+
+        {query && data && data.items.length === 0 && (
+          <EmptyState
+            title={`Sin resultados para «${query}»`}
+            description="Intenta con otro término o revisa la ortografía."
+          />
+        )}
+
+        {query && data && data.items.length > 0 && (
+          <div className="space-y-16">
+            <ArticleGrid articles={data.items} />
+            <PaginationControls
+              page={data.page}
+              totalPages={data.totalPages}
+              onPageChange={(newPage) =>
+                router.push(
+                  `/buscar?q=${encodeURIComponent(query)}${
+                    newPage === 1 ? "" : `&pagina=${newPage}`
+                  }`
+                )
+              }
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 }

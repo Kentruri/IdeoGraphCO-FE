@@ -3,53 +3,56 @@ import Link from "next/link";
 
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { formatPublishedAt } from "@/lib/format";
-import { getSourceCategoryMeta } from "@/lib/site";
 import type { Article } from "@/types/article";
 
 interface ArticleCardProps {
   article: Article;
 }
 
+/**
+ * Tile "recorte de prensa": sin caja ni sombra; la cinta de medición corona
+ * el recorte y la foto vive en escala de grises hasta el hover (la tinta de
+ * color pertenece a la medición, no a la foto).
+ */
 export function ArticleCard({ article }: ArticleCardProps) {
-  const categoryMeta = getSourceCategoryMeta(article.source.category);
-
   return (
-    <Card className="group relative h-full gap-0 overflow-hidden py-0 transition-shadow duration-200 ease-swift focus-within:ring-2 focus-within:ring-ring/60 hover:shadow-md">
+    <article className="group relative flex h-full flex-col focus-within:ring-2 focus-within:ring-ring/60 focus-within:ring-offset-4 focus-within:ring-offset-background">
       <Link
         href={`/noticia/${article.slug}`}
         className="flex h-full flex-col outline-none"
         aria-label={article.title}
       >
-        <div className="relative aspect-video w-full overflow-hidden bg-muted">
+        <IdeologyStrip
+          probabilities={article.ideology.probabilities}
+          className="origin-top motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out-expo motion-safe:group-hover:scale-y-150"
+        />
+
+        <div className="relative mt-3 aspect-video w-full overflow-hidden bg-muted">
           {article.imageUrl ? (
             <Image
               src={article.imageUrl}
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover motion-safe:transition-transform motion-safe:duration-250 motion-safe:ease-swift motion-safe:group-hover:scale-[1.03]"
+              className="object-cover grayscale motion-safe:transition-[filter,transform] motion-safe:duration-250 motion-safe:ease-out-expo group-hover:grayscale-0 motion-safe:group-hover:scale-[1.02] dark:opacity-90"
             />
           ) : (
-            <div className="flex h-full items-center justify-center font-heading text-2xl italic text-muted-foreground/60">
+            <div className="flex h-full items-center justify-center px-4 text-center font-display text-xl font-bold uppercase tracking-tight text-muted-foreground/50">
               {article.source.name}
             </div>
           )}
         </div>
 
-        <CardContent className="flex flex-1 flex-col gap-3 p-5">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-            <Badge variant="outline">{article.source.name}</Badge>
-            {categoryMeta && <span>{categoryMeta.label}</span>}
-            <span aria-hidden>·</span>
+        <div className="flex flex-1 flex-col gap-2.5 pt-4">
+          <p className="font-mono text-xs text-muted-foreground">
+            {article.source.name} ·{" "}
             <time dateTime={article.publishedAt}>
               {formatPublishedAt(article.publishedAt)}
             </time>
-          </div>
+          </p>
 
-          <h2 className="font-heading text-lg font-semibold leading-snug">
+          <h2 className="font-display text-lg font-bold leading-snug tracking-tight">
             {article.title}
           </h2>
 
@@ -57,16 +60,14 @@ export function ArticleCard({ article }: ArticleCardProps) {
             {article.subtitle}
           </p>
 
-          <div className="mt-auto flex flex-col gap-2.5 pt-2">
+          <div className="mt-auto pt-3">
             <IdeologyBadge
               ideologyClass={article.ideology.predicted}
               confidence={article.ideology.confidence}
-              className="self-start"
             />
-            <IdeologyStrip probabilities={article.ideology.probabilities} />
           </div>
-        </CardContent>
+        </div>
       </Link>
-    </Card>
+    </article>
   );
 }

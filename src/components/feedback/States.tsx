@@ -1,26 +1,36 @@
-import { cva } from "class-variance-authority";
-import { CircleAlert, Inbox, RotateCcw, type LucideIcon } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { IDEOLOGY_DISPLAY_ORDER, IDEOLOGY_META } from "@/types/ideology";
 
 /**
- * Contenedor común de estados de feedback (vacío / error).
- * Variantes CVA: el tono solo cambia el color del icono; la composición
- * es idéntica para que el sistema se lea como una sola voz.
+ * Motivo de los estados de feedback: la fila de 8 puntos del sistema.
+ * En vacío, apagada y alineada; en error, desalineada (la medición se rompió).
  */
-const stateContainer = cva(
-  "flex flex-col items-center gap-2 rounded-xl border border-dashed px-6 py-16 text-center",
-  {
-    variants: {
-      tone: {
-        neutral: "[&_[data-slot=state-icon]]:text-muted-foreground",
-        destructive: "[&_[data-slot=state-icon]]:text-destructive",
-      },
-    },
-    defaultVariants: { tone: "neutral" },
-  }
-);
+function DotsMotif({ broken = false }: { broken?: boolean }) {
+  return (
+    <div aria-hidden className="flex items-center gap-1.5">
+      {IDEOLOGY_DISPLAY_ORDER.map((ideologyClass, index) => (
+        <span
+          key={ideologyClass}
+          className={cn(
+            "size-2 rounded-full",
+            broken
+              ? "opacity-70"
+              : "opacity-35 motion-safe:transition-opacity motion-safe:duration-300"
+          )}
+          style={{
+            backgroundColor: IDEOLOGY_META[ideologyClass].cssVar,
+            transform: broken
+              ? `translateY(${index % 2 === 0 ? -4 : 4}px)`
+              : undefined,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 interface ErrorStateProps {
   onRetry?: () => void;
@@ -29,9 +39,15 @@ interface ErrorStateProps {
 
 export function ErrorState({ onRetry, className }: ErrorStateProps) {
   return (
-    <div role="alert" className={cn(stateContainer({ tone: "destructive" }), className)}>
-      <CircleAlert aria-hidden data-slot="state-icon" className="mb-1 size-8" />
-      <p className="font-heading text-xl font-semibold">
+    <div
+      role="alert"
+      className={cn(
+        "flex flex-col items-center gap-3 border border-dashed border-destructive/40 px-6 py-20 text-center",
+        className
+      )}
+    >
+      <DotsMotif broken />
+      <p className="mt-2 font-display text-2xl font-bold tracking-tight">
         No pudimos cargar las noticias
       </p>
       <p className="max-w-md text-sm leading-6 text-muted-foreground">
@@ -51,21 +67,21 @@ export function ErrorState({ onRetry, className }: ErrorStateProps) {
 interface EmptyStateProps {
   title: string;
   description?: string;
-  /** Icono contextual (p. ej. SearchX en búsqueda, Newspaper en portada). */
-  icon?: LucideIcon;
   className?: string;
 }
 
-export function EmptyState({
-  title,
-  description,
-  icon: Icon = Inbox,
-  className,
-}: EmptyStateProps) {
+export function EmptyState({ title, description, className }: EmptyStateProps) {
   return (
-    <div className={cn(stateContainer({ tone: "neutral" }), className)}>
-      <Icon aria-hidden data-slot="state-icon" className="mb-1 size-8" />
-      <p className="font-heading text-xl font-semibold">{title}</p>
+    <div
+      className={cn(
+        "flex flex-col items-center gap-3 border border-dashed px-6 py-20 text-center",
+        className
+      )}
+    >
+      <DotsMotif />
+      <p className="mt-2 font-display text-2xl font-bold tracking-tight">
+        {title}
+      </p>
       {description && (
         <p className="max-w-md text-sm leading-6 text-muted-foreground">
           {description}

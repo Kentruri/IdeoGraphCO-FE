@@ -13,19 +13,26 @@ interface SearchBarProps {
   initialQuery?: string;
   placeholder?: string;
   className?: string;
+  /** "hero" = variante grande de la página de búsqueda. */
+  size?: "default" | "hero";
   /** Se invoca tras navegar (útil para cerrar el menú móvil). */
   onNavigate?: () => void;
 }
 
-/** Caja de búsqueda: navega a /buscar?q=… al enviar. */
+/**
+ * Caja de búsqueda subrayada (voz de imprenta, no de formulario):
+ * navega a /buscar?q=… al enviar. Enter y el botón de flecha envían.
+ */
 export function SearchBar({
   initialQuery = "",
   placeholder = "Buscar noticias…",
   className,
+  size = "default",
   onNavigate,
 }: SearchBarProps) {
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
+  const hero = size === "hero";
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -43,7 +50,10 @@ export function SearchBar({
     >
       <Search
         aria-hidden
-        className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+        className={cn(
+          "pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted-foreground",
+          hero ? "left-0 size-5" : "left-1.5 size-4"
+        )}
       />
       <Input
         type="search"
@@ -51,18 +61,28 @@ export function SearchBar({
         onChange={(event) => setQuery(event.target.value)}
         placeholder={placeholder}
         aria-label="Buscar noticias"
-        className="pl-8 pr-9"
+        className={cn(
+          "rounded-none border-0 border-b border-input bg-transparent shadow-none transition-colors duration-150 ease-out-expo focus-visible:border-foreground focus-visible:ring-0 dark:bg-transparent",
+          hero
+            ? "h-14 pl-8 pr-12 font-display text-xl font-semibold md:h-16 md:text-2xl"
+            : "pl-7 pr-9"
+        )}
       />
       {/* Affordance de envío visible; Enter sigue funcionando. */}
       <Button
         type="submit"
         variant="ghost"
-        size="icon-sm"
+        size={hero ? "icon" : "icon-sm"}
         aria-label="Buscar"
         disabled={!query.trim()}
-        className="absolute right-0.5 top-1/2 -translate-y-1/2"
+        className="absolute right-0 top-1/2 -translate-y-1/2 rounded-none"
       >
-        <ArrowRight className="size-4" />
+        <ArrowRight
+          className={cn(
+            "motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out-expo motion-safe:group-hover/button:translate-x-0.5",
+            hero ? "size-5" : "size-4"
+          )}
+        />
       </Button>
     </form>
   );

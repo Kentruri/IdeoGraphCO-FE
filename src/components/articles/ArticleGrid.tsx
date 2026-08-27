@@ -7,13 +7,13 @@ interface ArticleGridProps {
 
 export function ArticleGrid({ articles }: ArticleGridProps) {
   return (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
       {articles.map((article, index) => (
         <div
           key={article.id}
           className="h-full motion-safe:animate-fade-up"
-          // Cascada de entrada: 40ms entre tarjetas (decorativa, no bloquea).
-          style={{ animationDelay: `${index * 40}ms` }}
+          // Cascada de entrada corta (decorativa, no bloquea interacción).
+          style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
         >
           <ArticleCard article={article} />
         </div>
