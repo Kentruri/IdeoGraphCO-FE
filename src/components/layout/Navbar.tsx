@@ -34,7 +34,7 @@ export function Navbar() {
           </SheetTrigger>
           <SheetContent side="left" className="w-80">
             <SheetHeader>
-              <SheetTitle className="font-serif text-xl">
+              <SheetTitle className="font-heading text-xl">
                 {SITE_NAME}
               </SheetTitle>
             </SheetHeader>
@@ -64,8 +64,11 @@ export function Navbar() {
           </SheetContent>
         </Sheet>
 
-        <Link href="/" className="flex items-baseline gap-2">
-          <span className="font-serif text-xl font-bold tracking-tight">
+        <Link
+          href="/"
+          className="flex items-baseline gap-2 rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+        >
+          <span className="font-heading text-xl font-bold tracking-tight">
             {SITE_NAME}
           </span>
           <span className="hidden text-xs text-muted-foreground md:inline">

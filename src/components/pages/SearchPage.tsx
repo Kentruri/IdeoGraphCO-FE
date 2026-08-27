@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
+import { Search, SearchX } from "lucide-react";
 
 import { ArticleGrid } from "@/components/articles/ArticleGrid";
 import { PaginationControls } from "@/components/articles/PaginationControls";
@@ -26,7 +27,9 @@ export function SearchPage() {
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
       <section className="mb-8 space-y-4">
-        <h1 className="font-serif text-3xl font-bold">Buscar noticias</h1>
+        <h1 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
+          Buscar noticias
+        </h1>
         <SearchBar
           key={query}
           initialQuery={query}
@@ -34,9 +37,17 @@ export function SearchPage() {
           placeholder="Título, subtítulo, medio o palabra clave…"
         />
         {query && (
-          <p className="text-sm text-muted-foreground">
+          <p aria-live="polite" className="text-sm text-muted-foreground">
             Resultados para <span className="font-medium">«{query}»</span>
-            {data ? ` — ${data.totalItems} coincidencias` : ""}
+            {data ? (
+              <>
+                :{" "}
+                <span className="font-mono tabular-nums">
+                  {data.totalItems}
+                </span>{" "}
+                coincidencias
+              </>
+            ) : null}
           </p>
         )}
       </section>
@@ -45,6 +56,7 @@ export function SearchPage() {
 
       {!query && (
         <EmptyState
+          icon={Search}
           title="Escribe un término para buscar"
           description="Puedes buscar por título, subtítulo, nombre del medio o palabras clave."
         />
@@ -56,6 +68,7 @@ export function SearchPage() {
 
       {query && data && data.items.length === 0 && (
         <EmptyState
+          icon={SearchX}
           title={`Sin resultados para «${query}»`}
           description="Intenta con otro término o revisa la ortografía."
         />

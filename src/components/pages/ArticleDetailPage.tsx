@@ -36,20 +36,23 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
       {isError && <ErrorState onRetry={refetch} />}
 
       {article && (
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_var(--spacing-aside)]">
           <article>
             {/* Miga de pan */}
             <nav
               aria-label="Miga de pan"
               className="mb-6 flex items-center gap-1 text-sm text-muted-foreground"
             >
-              <Link href="/" className="hover:text-foreground">
+              <Link
+                href="/"
+                className="rounded-sm outline-none transition-colors duration-150 ease-swift hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+              >
                 Portada
               </Link>
               <ChevronRight aria-hidden className="size-3.5" />
               <Link
                 href={`/fuentes/${article.source.category}`}
-                className="hover:text-foreground"
+                className="rounded-sm outline-none transition-colors duration-150 ease-swift hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
               >
                 {getSourceCategoryMeta(article.source.category)?.label ??
                   article.source.category}
@@ -67,11 +70,11 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
                 </span>
               </div>
 
-              <h1 className="font-serif text-3xl font-bold leading-tight md:text-4xl">
+              <h1 className="font-heading text-3xl font-bold leading-tight tracking-tight text-balance md:text-4xl">
                 {article.title}
               </h1>
 
-              <p className="text-lg leading-8 text-muted-foreground">
+              <p className="text-lg leading-8 text-pretty text-muted-foreground">
                 {article.subtitle}
               </p>
 
@@ -98,9 +101,10 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
               </figure>
             )}
 
+            {/* Lectura larga en serif (docs/design-system.md §2). */}
             <div className="space-y-5">
               {article.body.map((paragraph, index) => (
-                <p key={index} className="text-base leading-8">
+                <p key={index} className="font-serif text-lg leading-8">
                   {paragraph}
                 </p>
               ))}
@@ -121,10 +125,11 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
           </article>
 
           {/* Panel de análisis ideológico */}
-          <aside className="lg:sticky lg:top-32 lg:self-start">
+          {/* Offset = altura del header pegajoso + un paso de respiración. */}
+          <aside className="lg:sticky lg:top-[calc(var(--spacing-header)+1.5rem)] lg:self-start">
             <Card>
               <CardHeader>
-                <CardTitle className="font-serif text-xl">
+                <CardTitle className="font-heading text-xl">
                   Análisis ideológico
                 </CardTitle>
               </CardHeader>
@@ -142,7 +147,7 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
                   </p>
                   <p className="text-sm">
                     Confianza del modelo:{" "}
-                    <span className="font-semibold tabular-nums">
+                    <span className="font-mono font-semibold tabular-nums">
                       {formatConfidence(article.ideology.confidence)}
                     </span>
                   </p>

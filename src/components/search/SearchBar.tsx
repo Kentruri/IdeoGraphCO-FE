@@ -2,8 +2,9 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
@@ -50,8 +51,19 @@ export function SearchBar({
         onChange={(event) => setQuery(event.target.value)}
         placeholder={placeholder}
         aria-label="Buscar noticias"
-        className="pl-8"
+        className="pl-8 pr-9"
       />
+      {/* Affordance de envío visible; Enter sigue funcionando. */}
+      <Button
+        type="submit"
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Buscar"
+        disabled={!query.trim()}
+        className="absolute right-0.5 top-1/2 -translate-y-1/2"
+      >
+        <ArrowRight className="size-4" />
+      </Button>
     </form>
   );
 }

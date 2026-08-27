@@ -7,7 +7,7 @@ export function Footer() {
     <footer className="mt-16 border-t bg-secondary/40">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-3">
         <div className="space-y-3">
-          <p className="font-serif text-lg font-bold">{SITE_NAME}</p>
+          <p className="font-heading text-lg font-bold">{SITE_NAME}</p>
           <p className="text-sm leading-6 text-muted-foreground">
             {SITE_DESCRIPTION}
           </p>

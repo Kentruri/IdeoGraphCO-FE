@@ -12,8 +12,9 @@
   --font-serif: var(--font-newsreader);
   --font-heading: var(--font-newsreader);
 
-  /* Layout: alturas/anchos estructurales (ver docs/design-system.md §4). */
-  --spacing-header: 7rem;
+  /* Layout: alturas/anchos estructurales (ver docs/design-system.md §4).
+     header = fila principal (3.5rem) + fila de categorías (2.5rem). */
+  --spacing-header: 6rem;
   --spacing-aside: 22.5rem;
 
   /* Movimiento: curvas fuertes del sistema (ver docs/design-system.md §5). */

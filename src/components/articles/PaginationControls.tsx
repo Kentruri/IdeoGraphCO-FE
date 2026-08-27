@@ -51,9 +51,11 @@ export function PaginationControls({
       aria-label="Paginación de noticias"
       className={cn("flex items-center justify-center gap-1", className)}
     >
+      {/* size-11 (44px) en táctil, size-9 desde sm (objetivo táctil AAA). */}
       <Button
         variant="outline"
         size="icon"
+        className="size-11 sm:size-9"
         aria-label="Página anterior"
         disabled={page <= 1}
         onClick={() => onPageChange(page - 1)}
@@ -75,6 +77,7 @@ export function PaginationControls({
             key={value}
             variant={value === page ? "default" : "outline"}
             size="icon"
+            className="size-11 font-mono text-sm tabular-nums sm:size-9"
             aria-label={`Página ${value}`}
             aria-current={value === page ? "page" : undefined}
             onClick={() => onPageChange(value)}
@@ -87,6 +90,7 @@ export function PaginationControls({
       <Button
         variant="outline"
         size="icon"
+        className="size-11 sm:size-9"
         aria-label="Página siguiente"
         disabled={page >= totalPages}
         onClick={() => onPageChange(page + 1)}

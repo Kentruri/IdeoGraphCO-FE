@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock } from "lucide-react";
 
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
@@ -18,10 +17,10 @@ export function ArticleCard({ article }: ArticleCardProps) {
   const categoryMeta = getSourceCategoryMeta(article.source.category);
 
   return (
-    <Card className="group h-full gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md">
+    <Card className="group relative h-full gap-0 overflow-hidden py-0 transition-shadow duration-200 ease-swift focus-within:ring-2 focus-within:ring-ring/60 hover:shadow-md">
       <Link
         href={`/noticia/${article.slug}`}
-        className="flex h-full flex-col"
+        className="flex h-full flex-col outline-none"
         aria-label={article.title}
       >
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
@@ -31,44 +30,40 @@ export function ArticleCard({ article }: ArticleCardProps) {
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              className="object-cover motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-swift motion-safe:group-hover:scale-[1.03]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Sin imagen
+            <div className="flex h-full items-center justify-center font-heading text-2xl italic text-muted-foreground/60">
+              {article.source.name}
             </div>
           )}
         </div>
 
         <CardContent className="flex flex-1 flex-col gap-3 p-5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
             <Badge variant="outline">{article.source.name}</Badge>
             {categoryMeta && <span>{categoryMeta.label}</span>}
+            <span aria-hidden>·</span>
+            <time dateTime={article.publishedAt}>
+              {formatPublishedAt(article.publishedAt)}
+            </time>
           </div>
 
-          <h3 className="font-serif text-lg font-semibold leading-snug group-hover:underline">
+          <h2 className="font-heading text-lg font-semibold leading-snug">
             {article.title}
-          </h3>
+          </h2>
 
           <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
             {article.subtitle}
           </p>
 
-          <div className="mt-auto flex flex-col gap-3 pt-2">
-            <div className="flex items-center justify-between gap-2">
-              <IdeologyBadge
-                ideologyClass={article.ideology.predicted}
-                confidence={article.ideology.confidence}
-              />
-              <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-                <Clock aria-hidden className="size-3" />
-                {article.readingTimeMinutes} min
-              </span>
-            </div>
+          <div className="mt-auto flex flex-col gap-2.5 pt-2">
+            <IdeologyBadge
+              ideologyClass={article.ideology.predicted}
+              confidence={article.ideology.confidence}
+              className="self-start"
+            />
             <IdeologyStrip probabilities={article.ideology.probabilities} />
-            <span className="text-xs text-muted-foreground">
-              {formatPublishedAt(article.publishedAt)}
-            </span>
           </div>
         </CardContent>
       </Link>

@@ -1,5 +1,5 @@
-import { cn } from "@/lib/utils";
 import { formatProbability } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import {
   IDEOLOGY_CLASSES,
   IDEOLOGY_META,
@@ -17,7 +17,8 @@ interface IdeologyDistributionProps {
 /**
  * Lista de barras con la distribución softmax completa, ordenada de mayor
  * a menor probabilidad. Cada fila lleva etiqueta y valor visibles, de modo
- * que la lectura nunca depende únicamente del color.
+ * que la lectura nunca depende únicamente del color. Las barras animan
+ * `transform: scaleX` (no `width`) y solo bajo `motion-safe`.
  */
 export function IdeologyDistribution({
   probabilities,
@@ -39,8 +40,7 @@ export function IdeologyDistribution({
         return (
           <div
             key={ideologyClass}
-            title={meta.description}
-            className="grid grid-cols-[8.5rem_1fr_auto] items-center gap-3"
+            className="grid grid-cols-[minmax(0,9rem)_1fr_auto] items-center gap-3"
           >
             <span
               className={cn(
@@ -57,20 +57,20 @@ export function IdeologyDistribution({
               />
               {meta.label}
             </span>
-            <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div className="h-1.5 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full rounded-full transition-[width] duration-500"
+                className="h-full origin-left rounded-full motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-swift"
                 style={{
-                  // Escala relativa al máximo para que la barra líder ocupe todo
-                  // el riel y las demás se lean en proporción.
-                  width: `${(probability / maxProbability) * 100}%`,
+                  // Escala relativa al máximo para que la barra líder ocupe
+                  // todo el riel y las demás se lean en proporción.
+                  transform: `scaleX(${probability / maxProbability})`,
                   backgroundColor: meta.cssVar,
                 }}
               />
             </div>
             <span
               className={cn(
-                "w-14 text-right text-sm tabular-nums",
+                "w-14 text-right font-mono text-xs tabular-nums",
                 isPredicted
                   ? "font-semibold text-foreground"
                   : "text-muted-foreground"

@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ChevronRight, Newspaper } from "lucide-react";
 
 import { ArticleGrid } from "@/components/articles/ArticleGrid";
 import { PaginationControls } from "@/components/articles/PaginationControls";
@@ -29,12 +31,24 @@ export function SourceCategoryPage({ category }: SourceCategoryPageProps) {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-      <section className="mb-8 space-y-2">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Fuentes
-        </p>
-        <h1 className="font-serif text-3xl font-bold">{category.label}</h1>
-        <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+      <section className="mb-8 space-y-3">
+        <nav
+          aria-label="Miga de pan"
+          className="flex items-center gap-1 text-sm text-muted-foreground"
+        >
+          <Link
+            href="/"
+            className="rounded-sm outline-none transition-colors duration-150 ease-swift hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
+          >
+            Portada
+          </Link>
+          <ChevronRight aria-hidden className="size-3.5" />
+          <span aria-current="page">Fuentes {category.label.toLowerCase()}</span>
+        </nav>
+        <h1 className="font-heading text-3xl font-bold tracking-tight md:text-4xl">
+          {category.label}
+        </h1>
+        <p className="max-w-2xl text-base leading-7 text-pretty text-muted-foreground">
           {category.description}
         </p>
       </section>
@@ -47,6 +61,7 @@ export function SourceCategoryPage({ category }: SourceCategoryPageProps) {
 
       {data && data.items.length === 0 && (
         <EmptyState
+          icon={Newspaper}
           title={`Sin noticias de fuentes ${category.label.toLowerCase()}`}
           description="Todavía no hay artículos analizados para esta categoría de fuente."
         />
@@ -67,7 +82,8 @@ export function SourceCategoryPage({ category }: SourceCategoryPageProps) {
             }
           />
           <p className="text-center text-xs text-muted-foreground">
-            {data.totalItems} noticias en esta categoría
+            <span className="font-mono tabular-nums">{data.totalItems}</span>{" "}
+            noticias en esta categoría
           </p>
         </div>
       )}

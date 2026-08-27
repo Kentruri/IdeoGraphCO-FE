@@ -2,15 +2,17 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { Newspaper } from "lucide-react";
+
 import { ArticleGrid } from "@/components/articles/ArticleGrid";
 import { FeaturedArticleCard } from "@/components/articles/FeaturedArticleCard";
 import { PaginationControls } from "@/components/articles/PaginationControls";
 import { EmptyState, ErrorState } from "@/components/feedback/States";
+import { IdeologyLegend } from "@/components/ideology/IdeologyLegend";
 import { ArticleGridSkeleton } from "@/components/skeletons/ArticleCardSkeleton";
 import { Separator } from "@/components/ui/separator";
 import { SITE_DESCRIPTION } from "@/lib/site";
 import { useGetArticlesQuery } from "@/store/services/articles.api";
-import { IDEOLOGY_DISPLAY_ORDER, IDEOLOGY_META } from "@/types/ideology";
 
 const PAGE_SIZE = 9;
 
@@ -28,36 +30,16 @@ export function HomePage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-      {/* Encabezado editorial */}
-      <section className="mb-10 space-y-4">
-        <h1 className="max-w-3xl font-serif text-3xl font-bold leading-tight md:text-4xl">
+      {/* Encabezado editorial: titular de portada + la leyenda de 8 clases
+          como firma visual del producto (docs/design-system.md §1). */}
+      <section className="mb-10 space-y-5">
+        <h1 className="max-w-3xl font-heading text-4xl font-bold leading-tight tracking-tight text-balance md:text-5xl">
           La orientación ideológica de las noticias políticas, medida y visible
         </h1>
-        <p className="max-w-2xl text-base leading-7 text-muted-foreground">
+        <p className="max-w-2xl text-base leading-7 text-pretty text-muted-foreground">
           {SITE_DESCRIPTION}
         </p>
-        <ul
-          aria-label="Las ocho clases ideológicas"
-          className="flex flex-wrap gap-x-4 gap-y-1.5 pt-1"
-        >
-          {IDEOLOGY_DISPLAY_ORDER.map((ideologyClass) => {
-            const meta = IDEOLOGY_META[ideologyClass];
-            return (
-              <li
-                key={ideologyClass}
-                title={meta.description}
-                className="flex items-center gap-1.5 text-xs text-muted-foreground"
-              >
-                <span
-                  aria-hidden
-                  className="size-2 rounded-full"
-                  style={{ backgroundColor: meta.cssVar }}
-                />
-                {meta.label}
-              </li>
-            );
-          })}
-        </ul>
+        <IdeologyLegend />
       </section>
 
       <Separator className="mb-10" />
@@ -67,7 +49,11 @@ export function HomePage() {
       {isError && <ErrorState onRetry={refetch} />}
 
       {data && data.items.length === 0 && (
-        <EmptyState title="Aún no hay noticias analizadas" />
+        <EmptyState
+          icon={Newspaper}
+          title="Aún no hay noticias analizadas"
+          description="Cuando el clasificador procese los primeros artículos aparecerán aquí."
+        />
       )}
 
       {data && data.items.length > 0 && (
@@ -84,7 +70,8 @@ export function HomePage() {
             }
           />
           <p className="text-center text-xs text-muted-foreground">
-            {data.totalItems} noticias analizadas
+            <span className="font-mono tabular-nums">{data.totalItems}</span>{" "}
+            noticias analizadas
           </p>
         </div>
       )}
