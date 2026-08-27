@@ -9,8 +9,17 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-lora);
-  --font-heading: var(--font-sans);
+  --font-serif: var(--font-newsreader);
+  --font-heading: var(--font-newsreader);
+
+  /* Layout: alturas/anchos estructurales (ver docs/design-system.md §4). */
+  --spacing-header: 7rem;
+  --spacing-aside: 22.5rem;
+
+  /* Movimiento: curvas fuertes del sistema (ver docs/design-system.md §5). */
+  --ease-swift: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-smooth: cubic-bezier(0.77, 0, 0.175, 1);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -50,30 +59,33 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  /* Cromo "tinta sobre papel": neutros con matiz frío casi imperceptible
+     (hue 260, chroma ≤ 0.015). Sin color de acento de marca: la franja de
+     8 clases es el único color expresivo (docs/design-system.md §1 y §3). */
+  --background: oklch(0.99 0.002 260);
+  --foreground: oklch(0.21 0.012 260);
+  --card: oklch(1 0.001 260);
+  --card-foreground: oklch(0.21 0.012 260);
+  --popover: oklch(1 0.001 260);
+  --popover-foreground: oklch(0.21 0.012 260);
+  --primary: oklch(0.25 0.015 260);
+  --primary-foreground: oklch(0.985 0.002 260);
+  --secondary: oklch(0.962 0.004 260);
+  --secondary-foreground: oklch(0.25 0.015 260);
+  --muted: oklch(0.962 0.004 260);
+  --muted-foreground: oklch(0.5 0.012 260);
+  --accent: oklch(0.962 0.004 260);
+  --accent-foreground: oklch(0.25 0.015 260);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.915 0.005 260);
+  --input: oklch(0.915 0.005 260);
+  --ring: oklch(0.55 0.02 260);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.5rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -107,24 +119,26 @@
   --ideology-progresismo: #9085e9;
   --ideology-personalismo: #e66767;
 
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  /* Tinta profunda, nunca negro puro. La luminancia de --background se
+     conserva respecto a la superficie sobre la que se validó la paleta. */
+  --background: oklch(0.145 0.008 260);
+  --foreground: oklch(0.955 0.004 260);
+  --card: oklch(0.205 0.01 260);
+  --card-foreground: oklch(0.955 0.004 260);
+  --popover: oklch(0.205 0.01 260);
+  --popover-foreground: oklch(0.955 0.004 260);
+  --primary: oklch(0.93 0.005 260);
+  --primary-foreground: oklch(0.2 0.012 260);
+  --secondary: oklch(0.265 0.01 260);
+  --secondary-foreground: oklch(0.955 0.004 260);
+  --muted: oklch(0.265 0.01 260);
+  --muted-foreground: oklch(0.72 0.01 260);
+  --accent: oklch(0.265 0.01 260);
+  --accent-foreground: oklch(0.955 0.004 260);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.6 0.015 260);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -148,6 +162,15 @@
     @apply bg-background text-foreground;
   }
   html {
-    @apply font-sans;
+    @apply scroll-smooth font-sans;
+  }
+
+  /* El movimiento decorativo se declara con `motion-safe:` en los
+     componentes; aquí solo se neutraliza el desplazamiento suave, que no
+     admite variante por utilidad en el elemento raíz. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
   }
 }

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist_Mono, Inter, Lora } from "next/font/google";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
 
 import "./globals.css";
 
@@ -9,8 +9,14 @@ import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { StoreProvider } from "@/store/provider";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
-const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
+/* Pareja tipográfica del sistema (docs/design-system.md §2):
+   Newsreader (titulares y lectura larga) + Geist (UI) + Geist Mono (datos). */
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
+});
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
@@ -50,8 +56,8 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(
         "font-sans",
-        inter.variable,
-        lora.variable,
+        geist.variable,
+        newsreader.variable,
         geistMono.variable
       )}
     >
