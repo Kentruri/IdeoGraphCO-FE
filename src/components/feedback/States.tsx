@@ -1,22 +1,62 @@
-import { RotateCcw, SearchX } from "lucide-react";
+import { RotateCcw } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { IDEOLOGY_DISPLAY_ORDER, IDEOLOGY_META } from "@/types/ideology";
+
+/**
+ * Motivo de los estados de feedback: la fila de 8 puntos del sistema.
+ * En vacío, apagada y alineada; en error, desalineada (la medición se rompió).
+ */
+function DotsMotif({ broken = false }: { broken?: boolean }) {
+  return (
+    <div aria-hidden className="flex items-center gap-1.5">
+      {IDEOLOGY_DISPLAY_ORDER.map((ideologyClass, index) => (
+        <span
+          key={ideologyClass}
+          className={cn(
+            "size-2 rounded-full",
+            broken
+              ? "opacity-70"
+              : "opacity-35 motion-safe:transition-opacity motion-safe:duration-300"
+          )}
+          style={{
+            backgroundColor: IDEOLOGY_META[ideologyClass].cssVar,
+            transform: broken
+              ? `translateY(${index % 2 === 0 ? -4 : 4}px)`
+              : undefined,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 interface ErrorStateProps {
   onRetry?: () => void;
+  className?: string;
 }
 
-export function ErrorState({ onRetry }: ErrorStateProps) {
+export function ErrorState({ onRetry, className }: ErrorStateProps) {
   return (
-    <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed px-6 py-16 text-center">
-      <p className="text-lg font-semibold">No pudimos cargar las noticias</p>
-      <p className="max-w-md text-sm text-muted-foreground">
+    <div
+      role="alert"
+      className={cn(
+        "flex flex-col items-center gap-3 border border-dashed border-destructive/40 px-6 py-20 text-center",
+        className
+      )}
+    >
+      <DotsMotif broken />
+      <p className="mt-2 font-display text-2xl font-bold tracking-tight">
+        No pudimos cargar las noticias
+      </p>
+      <p className="max-w-md text-sm leading-6 text-muted-foreground">
         Ocurrió un error al consultar la API. Verifica tu conexión e inténtalo
         de nuevo.
       </p>
       {onRetry && (
-        <Button variant="outline" onClick={onRetry} className="gap-2">
-          <RotateCcw className="size-4" />
+        <Button variant="outline" onClick={onRetry} className="mt-3 gap-2">
+          <RotateCcw aria-hidden className="size-4" />
           Reintentar
         </Button>
       )}
@@ -27,16 +67,34 @@ export function ErrorState({ onRetry }: ErrorStateProps) {
 interface EmptyStateProps {
   title: string;
   description?: string;
+  /** Acción de salida (p. ej. limpiar filtros). */
+  action?: React.ReactNode;
+  className?: string;
 }
 
-export function EmptyState({ title, description }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  description,
+  action,
+  className,
+}: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed px-6 py-16 text-center">
-      <SearchX aria-hidden className="size-8 text-muted-foreground" />
-      <p className="text-lg font-semibold">{title}</p>
-      {description && (
-        <p className="max-w-md text-sm text-muted-foreground">{description}</p>
+    <div
+      className={cn(
+        "flex flex-col items-center gap-3 border border-dashed px-6 py-20 text-center",
+        className
       )}
+    >
+      <DotsMotif />
+      <p className="mt-2 font-display text-2xl font-bold tracking-tight">
+        {title}
+      </p>
+      {description && (
+        <p className="max-w-md text-sm leading-6 text-muted-foreground">
+          {description}
+        </p>
+      )}
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }

@@ -27,9 +27,8 @@ export function IdeologyStrip({ probabilities, className }: IdeologyStripProps) 
   return (
     <div
       role="img"
-      aria-label={`Distribución ideológica — ${summary}`}
-      title={summary}
-      className={cn("flex h-1.5 w-full gap-[2px]", className)}
+      aria-label={`Distribución ideológica: ${summary}`}
+      className={cn("flex h-1.5 w-full gap-0.5", className)}
     >
       {IDEOLOGY_DISPLAY_ORDER.map((ideologyClass) => (
         <span

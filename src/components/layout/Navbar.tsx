@@ -15,16 +15,28 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { SITE_NAME, SOURCE_CATEGORY_META } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
+/** Navegación única: las páginas del diario. */
+const NAV_LINKS: Array<{ href: string; label: string }> = [
+  { href: "/", label: "Portada" },
+  { href: "/redaccion", label: "Mesa de redacción" },
+  { href: "/noticias", label: "Noticias" },
+  { href: "/buscar", label: "Buscar" },
+];
+
+/**
+ * Masthead de prensa: cabecera con marca display expandida y una fila de
+ * secciones estilo pestañas de periódico (activo = subrayado de 2px).
+ */
 export function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur supports-[backdrop-filter]:bg-background/75">
-      <div className="mx-auto flex h-14 w-full max-w-7xl items-center gap-4 px-4 sm:px-6">
+    <header className="sticky top-0 z-50 border-b bg-background">
+      <div className="mx-auto flex h-16 w-full max-w-7xl items-center gap-4 px-4 sm:px-6">
         {/* Menú móvil */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="lg:hidden">
@@ -32,9 +44,10 @@ export function Navbar() {
               <Menu className="size-5" />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-80">
+          {/* Curva de drawer (iOS) en lugar del ease-in-out genérico. */}
+          <SheetContent side="left" className="w-80 duration-300 ease-drawer">
             <SheetHeader>
-              <SheetTitle className="font-serif text-xl">
+              <SheetTitle className="font-display text-xl font-extrabold uppercase tracking-tight">
                 {SITE_NAME}
               </SheetTitle>
             </SheetHeader>
@@ -43,58 +56,48 @@ export function Navbar() {
                 className="mb-3"
                 onNavigate={() => setMobileMenuOpen(false)}
               />
-              <MobileNavLink
-                href="/"
-                active={pathname === "/"}
-                onNavigate={() => setMobileMenuOpen(false)}
-              >
-                Portada
-              </MobileNavLink>
-              {SOURCE_CATEGORY_META.map((category) => (
+              {NAV_LINKS.map((link) => (
                 <MobileNavLink
-                  key={category.slug}
-                  href={`/fuentes/${category.slug}`}
-                  active={pathname === `/fuentes/${category.slug}`}
+                  key={link.href}
+                  href={link.href}
+                  active={pathname === link.href}
                   onNavigate={() => setMobileMenuOpen(false)}
                 >
-                  {category.label}
+                  {link.label}
                 </MobileNavLink>
               ))}
             </div>
           </SheetContent>
         </Sheet>
 
-        <Link href="/" className="flex items-baseline gap-2">
-          <span className="font-serif text-xl font-bold tracking-tight">
+        <Link
+          href="/"
+          className="flex min-w-0 items-baseline gap-3 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/60"
+        >
+          <span className="font-display text-2xl font-extrabold uppercase tracking-tight md:font-stretch-expanded">
             {SITE_NAME}
           </span>
-          <span className="hidden text-xs text-muted-foreground md:inline">
-            Ideología en noticias políticas colombianas
+          <span className="hidden truncate font-mono text-[11px] text-muted-foreground xl:inline">
+            ideología medida en noticias políticas colombianas
           </span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2">
-          <SearchBar className="hidden w-56 md:block" />
+          <SearchBar className="hidden w-64 md:block" />
           <ThemeToggle />
         </div>
       </div>
 
-      {/* Categorías de fuente (escritorio) */}
-      <nav
-        aria-label="Categorías de fuente"
-        className="hidden border-t lg:block"
-      >
-        <div className="mx-auto flex h-10 w-full max-w-7xl items-center gap-1 px-4 sm:px-6">
-          <DesktopNavLink href="/" active={pathname === "/"}>
-            Portada
-          </DesktopNavLink>
-          {SOURCE_CATEGORY_META.map((category) => (
+      {/* Secciones (escritorio): pestañas de periódico. */}
+      <nav aria-label="Secciones" className="hidden border-t lg:block">
+        <div className="mx-auto flex h-10 w-full max-w-7xl items-stretch gap-5 px-4 sm:px-6">
+          {NAV_LINKS.map((link) => (
             <DesktopNavLink
-              key={category.slug}
-              href={`/fuentes/${category.slug}`}
-              active={pathname === `/fuentes/${category.slug}`}
+              key={link.href}
+              href={link.href}
+              active={pathname === link.href}
             >
-              {category.label}
+              {link.label}
             </DesktopNavLink>
           ))}
         </div>
@@ -117,10 +120,10 @@ function DesktopNavLink({
       href={href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-3 py-1.5 text-sm transition-colors",
+        "flex items-center border-b-2 text-sm outline-none transition-colors duration-150 ease-out-expo focus-visible:ring-2 focus-visible:ring-ring/60",
         active
-          ? "bg-secondary font-medium text-foreground"
-          : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+          ? "border-foreground font-medium text-foreground"
+          : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
       )}
     >
       {children}
@@ -145,10 +148,10 @@ function MobileNavLink({
       onClick={onNavigate}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-3 py-2 text-sm transition-colors",
+        "border-l-2 px-3 py-2 text-sm outline-none transition-colors duration-150 ease-out-expo focus-visible:ring-2 focus-visible:ring-ring/60",
         active
-          ? "bg-secondary font-medium text-foreground"
-          : "text-muted-foreground hover:bg-secondary/60 hover:text-foreground"
+          ? "border-foreground font-medium text-foreground"
+          : "border-border text-muted-foreground hover:border-muted-foreground hover:text-foreground"
       )}
     >
       {children}

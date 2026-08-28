@@ -1,18 +1,13 @@
-import { Suspense } from "react";
-
-import { HomePage } from "@/components/pages/HomePage";
-import { ArticleGridSkeleton } from "@/components/skeletons/ArticleCardSkeleton";
+import { Hero } from "@/components/landing/Hero";
+import { MethodSection } from "@/components/landing/MethodSection";
+import { TensionAxes } from "@/components/landing/TensionAxes";
 
 export default function Home() {
   return (
-    <Suspense
-      fallback={
-        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-          <ArticleGridSkeleton />
-        </div>
-      }
-    >
-      <HomePage />
-    </Suspense>
+    <>
+      <Hero />
+      <TensionAxes />
+      <MethodSection />
+    </>
   );
 }

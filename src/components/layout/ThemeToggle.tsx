@@ -40,13 +40,22 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
+      className="relative"
       aria-label={
         theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro"
       }
       onClick={() => dispatch(themeToggled())}
     >
-      <Sun className="size-4 dark:hidden" />
-      <Moon className="hidden size-4 dark:block" />
+      {/* Morph sol↔luna (rotación + escala; sin motion-safe el cambio de
+          estado sigue siendo visible, solo que instantáneo). */}
+      <Sun
+        aria-hidden
+        className="size-4 rotate-0 scale-100 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out-expo dark:-rotate-90 dark:scale-0"
+      />
+      <Moon
+        aria-hidden
+        className="absolute size-4 rotate-90 scale-0 motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out-expo dark:rotate-0 dark:scale-100"
+      />
     </Button>
   );
 }

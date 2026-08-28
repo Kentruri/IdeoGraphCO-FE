@@ -1,77 +1,73 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock } from "lucide-react";
 
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import { formatPublishedAt } from "@/lib/format";
-import { getSourceCategoryMeta } from "@/lib/site";
 import type { Article } from "@/types/article";
 
 interface ArticleCardProps {
   article: Article;
 }
 
+/**
+ * Tile "recorte de prensa": sin caja ni sombra; la cinta de medición corona
+ * el recorte y la foto vive en escala de grises hasta el hover (la tinta de
+ * color pertenece a la medición, no a la foto).
+ */
 export function ArticleCard({ article }: ArticleCardProps) {
-  const categoryMeta = getSourceCategoryMeta(article.source.category);
-
   return (
-    <Card className="group h-full gap-0 overflow-hidden py-0 transition-shadow hover:shadow-md">
+    <article className="group relative flex h-full flex-col focus-within:ring-2 focus-within:ring-ring/60 focus-within:ring-offset-4 focus-within:ring-offset-background motion-safe:transition-[transform,box-shadow] motion-safe:duration-200 motion-safe:ease-out-expo motion-safe:hover:shadow-lg motion-safe:hover:shadow-foreground/15 motion-safe:hover:[transform:perspective(900px)_rotateX(1.6deg)_translateY(-5px)]">
       <Link
         href={`/noticia/${article.slug}`}
-        className="flex h-full flex-col"
+        className="flex h-full flex-col outline-none"
         aria-label={article.title}
       >
-        <div className="relative aspect-video w-full overflow-hidden bg-muted">
+        <IdeologyStrip
+          probabilities={article.ideology.probabilities}
+          className="origin-top motion-safe:transition-transform motion-safe:duration-200 motion-safe:ease-out-expo motion-safe:group-hover:scale-y-150"
+        />
+
+        <div className="relative mt-3 aspect-video w-full overflow-hidden bg-muted">
           {article.imageUrl ? (
             <Image
               src={article.imageUrl}
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+              className="object-cover grayscale motion-safe:transition-[filter] motion-safe:duration-250 motion-safe:ease-out-expo group-hover:grayscale-0 dark:opacity-90"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Sin imagen
+            <div className="flex h-full items-center justify-center px-4 text-center font-display text-xl font-bold uppercase tracking-tight text-muted-foreground/50">
+              {article.source.name}
             </div>
           )}
         </div>
 
-        <CardContent className="flex flex-1 flex-col gap-3 p-5">
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Badge variant="outline">{article.source.name}</Badge>
-            {categoryMeta && <span>{categoryMeta.label}</span>}
-          </div>
+        <div className="flex flex-1 flex-col gap-2.5 pt-4">
+          <p className="font-mono text-xs text-muted-foreground">
+            {article.source.name} ·{" "}
+            <time dateTime={article.publishedAt}>
+              {formatPublishedAt(article.publishedAt)}
+            </time>
+          </p>
 
-          <h3 className="font-serif text-lg font-semibold leading-snug group-hover:underline">
+          <h2 className="font-display text-lg font-bold leading-snug tracking-tight">
             {article.title}
-          </h3>
+          </h2>
 
           <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
             {article.subtitle}
           </p>
 
-          <div className="mt-auto flex flex-col gap-3 pt-2">
-            <div className="flex items-center justify-between gap-2">
-              <IdeologyBadge
-                ideologyClass={article.ideology.predicted}
-                confidence={article.ideology.confidence}
-              />
-              <span className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
-                <Clock aria-hidden className="size-3" />
-                {article.readingTimeMinutes} min
-              </span>
-            </div>
-            <IdeologyStrip probabilities={article.ideology.probabilities} />
-            <span className="text-xs text-muted-foreground">
-              {formatPublishedAt(article.publishedAt)}
-            </span>
+          <div className="mt-auto pt-3">
+            <IdeologyBadge
+              ideologyClass={article.ideology.predicted}
+              confidence={article.ideology.confidence}
+            />
           </div>
-        </CardContent>
+        </div>
       </Link>
-    </Card>
+    </article>
   );
 }
