@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { ArrowDown } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
-import { IdeoGraphCanvas } from "@/components/landing/IdeoGraphCanvas";
+import { VerdictDeck } from "@/components/landing/VerdictDeck";
 import { Button } from "@/components/ui/button";
 
 /**
- * Hero de portada: declaración editorial a la izquierda sobre el grafo
- * generativo de las 8 clases a pantalla completa. Asimétrico por diseño
- * (VARIANCE 7): el vacío de la derecha es del grafo.
+ * Hero de portada: declaración editorial junto a la pila de veredictos,
+ * mediciones de ejemplo que se barajan en 3D con los materiales reales
+ * del sistema (cinta, badge, tipografía).
  */
 export function Hero() {
   return (
@@ -15,39 +15,32 @@ export function Hero() {
       aria-label="Presentación"
       className="relative flex min-h-[calc(100svh-var(--spacing-header))] items-center overflow-hidden"
     >
-      <div className="absolute inset-0">
-        <IdeoGraphCanvas />
-        {/* Velo funcional de legibilidad sobre la zona de texto. */}
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-linear-to-r from-background from-20% via-background/70 via-45% to-transparent to-70% max-md:bg-linear-to-t max-md:from-background max-md:from-30% max-md:via-background/60 max-md:to-transparent"
-        />
-      </div>
-
-      <div className="relative mx-auto w-full max-w-7xl px-4 py-16 sm:px-6">
-        <div className="max-w-3xl space-y-7">
-          <h1 className="font-display text-[2.65rem] font-extrabold uppercase leading-[0.98] tracking-tight text-balance motion-safe:animate-fade-up sm:text-6xl lg:text-7xl">
+      <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,30rem)] lg:gap-8 lg:py-10">
+        <div className="max-w-2xl space-y-7">
+          <h1 className="font-display text-4xl font-extrabold uppercase leading-[0.98] tracking-tight text-balance motion-safe:animate-fade-up sm:text-5xl lg:text-6xl">
             El mapa ideológico de la prensa colombiana
           </h1>
           <p className="max-w-xl text-lg leading-8 text-pretty text-muted-foreground motion-safe:animate-fade-up motion-safe:[animation-delay:120ms]">
-            Un clasificador multiclase lee cada noticia política y reparte su
-            encuadre entre ocho clases ideológicas en tensión.
+            Un clasificador multiclase lee cada texto político y reparte su
+            encuadre entre ocho clases en tensión.
           </p>
           <div className="flex flex-wrap items-center gap-3 motion-safe:animate-fade-up motion-safe:[animation-delay:220ms]">
             <Button asChild size="lg" className="px-5">
-              <Link href="#portada">
-                Explorar noticias
-                <ArrowDown
+              <Link href="/redaccion">
+                Clasificar un texto
+                <ArrowRight
                   aria-hidden
-                  className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out-expo motion-safe:group-hover/button:translate-y-0.5"
+                  className="motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out-expo motion-safe:group-hover/button:translate-x-0.5"
                 />
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="px-5">
-              <Link href="#metodo">Cómo se mide</Link>
+              <Link href="/noticias">Explorar noticias</Link>
             </Button>
           </div>
         </div>
+
+        <VerdictDeck className="w-full motion-safe:animate-fade-up motion-safe:[animation-delay:150ms]" />
       </div>
     </section>
   );

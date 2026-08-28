@@ -17,7 +17,7 @@ interface ArticleCardProps {
  */
 export function ArticleCard({ article }: ArticleCardProps) {
   return (
-    <article className="group relative flex h-full flex-col focus-within:ring-2 focus-within:ring-ring/60 focus-within:ring-offset-4 focus-within:ring-offset-background">
+    <article className="group relative flex h-full flex-col focus-within:ring-2 focus-within:ring-ring/60 focus-within:ring-offset-4 focus-within:ring-offset-background motion-safe:transition-[transform,box-shadow] motion-safe:duration-200 motion-safe:ease-out-expo motion-safe:hover:shadow-lg motion-safe:hover:shadow-foreground/15 motion-safe:hover:[transform:perspective(900px)_rotateX(1.6deg)_translateY(-5px)]">
       <Link
         href={`/noticia/${article.slug}`}
         className="flex h-full flex-col outline-none"
@@ -35,7 +35,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover grayscale motion-safe:transition-[filter,transform] motion-safe:duration-250 motion-safe:ease-out-expo group-hover:grayscale-0 motion-safe:group-hover:scale-[1.02] dark:opacity-90"
+              className="object-cover grayscale motion-safe:transition-[filter] motion-safe:duration-250 motion-safe:ease-out-expo group-hover:grayscale-0 dark:opacity-90"
             />
           ) : (
             <div className="flex h-full items-center justify-center px-4 text-center font-display text-xl font-bold uppercase tracking-tight text-muted-foreground/50">

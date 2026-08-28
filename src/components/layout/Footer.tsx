@@ -1,6 +1,14 @@
 import Link from "next/link";
 
-import { SITE_DESCRIPTION, SITE_NAME, SOURCE_CATEGORY_META } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME } from "@/lib/site";
+
+const FOOTER_LINKS = [
+  { href: "/redaccion", label: "Mesa de redacción" },
+  { href: "/noticias", label: "Noticias" },
+  { href: "/#clases", label: "Las ocho clases" },
+  { href: "/#metodo", label: "Método" },
+  { href: "/buscar", label: "Buscar" },
+];
 
 /** Colofón de imprenta: regla doble, wordmark fantasma y créditos. */
 export function Footer() {
@@ -26,15 +34,15 @@ export function Footer() {
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm font-semibold">Fuentes</p>
-          <ul className="grid grid-cols-2 gap-1.5 text-sm">
-            {SOURCE_CATEGORY_META.map((category) => (
-              <li key={category.slug}>
+          <p className="text-sm font-semibold">Índice</p>
+          <ul className="grid gap-1.5 text-sm">
+            {FOOTER_LINKS.map((link) => (
+              <li key={link.href}>
                 <Link
-                  href={`/fuentes/${category.slug}`}
+                  href={link.href}
                   className="rounded-sm text-muted-foreground outline-none transition-colors duration-150 ease-out-expo hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
                 >
-                  {category.label}
+                  {link.label}
                 </Link>
               </li>
             ))}

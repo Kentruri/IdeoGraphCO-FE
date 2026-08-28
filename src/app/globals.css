@@ -27,6 +27,17 @@
   /* Entradas del sistema. --stagger lo fija cada componente. */
   --animate-fade-up: fade-up 0.5s var(--ease-out-expo) both;
   --animate-shimmer: shimmer 1.8s linear infinite;
+  /* Titular "recién impreso": la tinta entra de izquierda a derecha. */
+  --animate-ink-print: ink-print 0.7s var(--ease-out-expo) both;
+
+  @keyframes ink-print {
+    from {
+      clip-path: inset(0 100% 0 0);
+    }
+    to {
+      clip-path: inset(0 0 0 0);
+    }
+  }
 
   @keyframes fade-up {
     from {

@@ -45,19 +45,16 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
               className="mb-8 flex items-center gap-1 font-mono text-xs text-muted-foreground"
             >
               <Link
-                href="/"
+                href="/noticias"
                 className="rounded-sm outline-none transition-colors duration-150 ease-out-expo hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
               >
-                Portada
+                Noticias
               </Link>
               <ChevronRight aria-hidden className="size-3" />
-              <Link
-                href={`/fuentes/${article.source.category}`}
-                className="rounded-sm outline-none transition-colors duration-150 ease-out-expo hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/60"
-              >
+              <span aria-current="page">
                 {getSourceCategoryMeta(article.source.category)?.label ??
                   article.source.category}
-              </Link>
+              </span>
             </nav>
 
             <header className="space-y-5">

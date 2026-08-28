@@ -15,8 +15,16 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { SITE_NAME, SOURCE_CATEGORY_META } from "@/lib/site";
+import { SITE_NAME } from "@/lib/site";
 import { cn } from "@/lib/utils";
+
+/** Navegación única: las páginas del diario. */
+const NAV_LINKS: Array<{ href: string; label: string }> = [
+  { href: "/", label: "Portada" },
+  { href: "/redaccion", label: "Mesa de redacción" },
+  { href: "/noticias", label: "Noticias" },
+  { href: "/buscar", label: "Buscar" },
+];
 
 /**
  * Masthead de prensa: cabecera con marca display expandida y una fila de
@@ -48,21 +56,14 @@ export function Navbar() {
                 className="mb-3"
                 onNavigate={() => setMobileMenuOpen(false)}
               />
-              <MobileNavLink
-                href="/"
-                active={pathname === "/"}
-                onNavigate={() => setMobileMenuOpen(false)}
-              >
-                Portada
-              </MobileNavLink>
-              {SOURCE_CATEGORY_META.map((category) => (
+              {NAV_LINKS.map((link) => (
                 <MobileNavLink
-                  key={category.slug}
-                  href={`/fuentes/${category.slug}`}
-                  active={pathname === `/fuentes/${category.slug}`}
+                  key={link.href}
+                  href={link.href}
+                  active={pathname === link.href}
                   onNavigate={() => setMobileMenuOpen(false)}
                 >
-                  {category.label}
+                  {link.label}
                 </MobileNavLink>
               ))}
             </div>
@@ -88,21 +89,15 @@ export function Navbar() {
       </div>
 
       {/* Secciones (escritorio): pestañas de periódico. */}
-      <nav
-        aria-label="Categorías de fuente"
-        className="hidden border-t lg:block"
-      >
+      <nav aria-label="Secciones" className="hidden border-t lg:block">
         <div className="mx-auto flex h-10 w-full max-w-7xl items-stretch gap-5 px-4 sm:px-6">
-          <DesktopNavLink href="/" active={pathname === "/"}>
-            Portada
-          </DesktopNavLink>
-          {SOURCE_CATEGORY_META.map((category) => (
+          {NAV_LINKS.map((link) => (
             <DesktopNavLink
-              key={category.slug}
-              href={`/fuentes/${category.slug}`}
-              active={pathname === `/fuentes/${category.slug}`}
+              key={link.href}
+              href={link.href}
+              active={pathname === link.href}
             >
-              {category.label}
+              {link.label}
             </DesktopNavLink>
           ))}
         </div>

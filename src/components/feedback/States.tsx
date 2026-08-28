@@ -67,10 +67,17 @@ export function ErrorState({ onRetry, className }: ErrorStateProps) {
 interface EmptyStateProps {
   title: string;
   description?: string;
+  /** Acción de salida (p. ej. limpiar filtros). */
+  action?: React.ReactNode;
   className?: string;
 }
 
-export function EmptyState({ title, description, className }: EmptyStateProps) {
+export function EmptyState({
+  title,
+  description,
+  action,
+  className,
+}: EmptyStateProps) {
   return (
     <div
       className={cn(
@@ -87,6 +94,7 @@ export function EmptyState({ title, description, className }: EmptyStateProps) {
           {description}
         </p>
       )}
+      {action && <div className="mt-3">{action}</div>}
     </div>
   );
 }
