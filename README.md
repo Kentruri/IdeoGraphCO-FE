@@ -6,8 +6,10 @@ colombianas”** (Universidad del Valle). Renderiza noticias paginadas y, para
 cada una, la **clase ideológica predicha** y la **distribución de probabilidad
 sobre las 8 clases** (salida softmax del clasificador).
 
-> **Estado actual:** la API real (IdeoGraphCO-BE) aún no existe, así que el
-> frontend consume rutas mock (`src/app/api`) con datos de demostración.
+> **Estado actual:** IdeoGraphCO-BE ya existe y expone el contrato v2
+> (`GET /api/v1/stories`, ver `CONTRACT.md` en ese repo), pero el frontend
+> aún no está migrado: sigue consumiendo las rutas mock (`src/app/api`) con
+> la forma del contrato anterior (`/api/articles`) y datos de demostración.
 > Medios, autores y clasificaciones son ficticios.
 
 ## Stack
@@ -69,8 +71,11 @@ UI (cards, distribución ideológica, paginación)
 ### Conectar la API real
 
 1. Define `NEXT_PUBLIC_API_URL` (p. ej. `https://api.ideographco.dev/v1`).
-2. Asegura que el backend devuelva los DTOs de `src/types/article.ts`
-   (o ajusta solo `src/adapters/article.adapter.ts`).
+2. Migra los DTOs de `src/types/article.ts`, el adapter
+   (`src/adapters/article.adapter.ts`) y las rutas de RTK Query al contrato
+   v2 de IdeoGraphCO-BE: `/api/v1/stories`, `synthesized` nullable y
+   `sources[]` con clasificación por fuente (tabla de diferencias al final
+   de su `CONTRACT.md`).
 3. Borra `src/app/api/articles` y `src/mocks/`.
 
 ## Las 8 clases ideológicas
@@ -79,8 +84,8 @@ Cuatro pares opuestos, alineados con `src.core.schema` del pipeline de ML:
 
 | Clase | Opuesto |
 |-------|---------|
-| Personalismo | Institucionalismo |
-| Populismo | Doctrinarismo |
+| Populismo | Institucionalismo |
+| Personalismo | Doctrinarismo |
 | Soberanismo | Globalismo |
 | Conservadurismo | Progresismo |
 
@@ -101,5 +106,6 @@ va acompañada de su etiqueta de texto.
 - **Redux en lugar de Context**: el tema y la capa de datos viven en el store;
   RTK Query maneja caché, revalidación y estados de carga.
 - **Mock API como route handlers**: el frontend ya consume HTTP real
-  (paginación, filtros y 404 incluidos), de modo que el cambio a la API real
-  es solo de URL.
+  (paginación, filtros y 404 incluidos). Siguen la forma del contrato v1
+  (`/api/articles`), así que pasar a IdeoGraphCO-BE exige migrar tipos y
+  adapter al contrato v2, no solo cambiar la URL.
