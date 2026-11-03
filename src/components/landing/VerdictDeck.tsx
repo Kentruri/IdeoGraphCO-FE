@@ -258,11 +258,6 @@ export function VerdictDeck({ className }: { className?: string }) {
                       }
                     : { ...pose, filter: `blur(${slot * 0.5}px)` }
                 }
-                whileHover={
-                  front && !reduce
-                    ? { y: pose.y - 7, scale: 1.015, filter: "blur(0px)" }
-                    : undefined
-                }
                 onAnimationComplete={
                   archiving ? () => setLastArchived(null) : undefined
                 }
@@ -273,21 +268,24 @@ export function VerdictDeck({ className }: { className?: string }) {
                       ? { duration: 0.62, ease: [0.45, 0, 0.2, 1] }
                       : { type: "spring", duration: 0.55, bounce: 0.15 }
                 }
+                /* El hover se detecta aquí (contorno quieto, ampliado hacia
+                   arriba con -mt/pt para cubrir el lift del hijo): así el
+                   borde nunca se escapa del cursor y no parpadea. Click en
+                   cualquier punto que no sea el enlace = pasar recorte. */
+                onClick={front && cardCount > 1 ? advance : undefined}
                 className={cn(
                   "absolute inset-x-0 top-0",
-                  front ? "" : "pointer-events-none"
+                  front
+                    ? "group/deck -mt-3 cursor-pointer pt-3"
+                    : "pointer-events-none"
                 )}
               >
-                {/* Superficie = pasar recorte (conveniencia de puntero: el
-                    teclado tiene el chevron y el enlace); el enlace "Leer"
-                    navega y corta la propagación. */}
                 <div
                   aria-hidden={front ? undefined : true}
-                  onClick={front && cardCount > 1 ? advance : undefined}
                   className={cn(
-                    "group relative bg-card ring-1 ring-border transition-shadow duration-200 ease-out-expo",
+                    "group relative bg-card ring-1 ring-border transition-[transform,box-shadow] duration-200 ease-out-expo",
                     front &&
-                      "cursor-pointer shadow-lg shadow-foreground/15 hover:shadow-xl hover:shadow-foreground/20"
+                      "shadow-lg shadow-foreground/15 motion-safe:group-hover/deck:-translate-y-2 group-hover/deck:shadow-xl group-hover/deck:shadow-foreground/20"
                   )}
                 >
                   <DeckCardBody card={card} front={front} />
