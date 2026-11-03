@@ -49,6 +49,7 @@ src/
 │   └── ui/                    # shadcn/ui (generado)
 ├── store/                     # Redux Toolkit
 │   ├── services/articles.api.ts    # RTK Query (getArticles, getArticleBySlug)
+│   ├── services/classifier.api.ts  # RTK Query (classifyText → POST /classify del BE)
 │   └── slices/preferences.slice.ts # Tema claro/oscuro
 ├── adapters/                  # DTO (snake_case) → modelo de UI (camelCase)
 ├── types/                     # ideology.ts (8 clases), article.ts (DTOs + modelos)
@@ -77,6 +78,16 @@ UI (cards, distribución ideológica, paginación)
    `sources[]` con clasificación por fuente (tabla de diferencias al final
    de su `CONTRACT.md`).
 3. Borra `src/app/api/articles` y `src/mocks/`.
+
+### Mesa de redacción con el modelo real
+
+La mesa de redacción (`ClassifierDesk`) clasifica con el modelo del trabajo
+de grado si se define `NEXT_PUBLIC_CLASSIFIER_API_URL` (p. ej.
+`http://localhost:8000/api/v1`): llama a `POST /classify` de IdeoGraphCO-BE,
+que reenvía el texto al servicio de inferencia y no guarda nada. Sin la
+variable usa el léxico de demostración del navegador, y cada veredicto
+declara cuál de los dos lo emitió. Va aparte de `NEXT_PUBLIC_API_URL` porque
+el listado sigue en las rutas mock hasta migrar al contrato v2.
 
 ## Las 8 clases ideológicas
 

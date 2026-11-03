@@ -26,6 +26,12 @@ export interface ArticleClassificationDTO {
   model_version: string;
 }
 
+/** Cuerpo de `POST /api/v1/classify` (mesa de redacción; el BE no lo guarda). */
+export interface ClassifyRequestDTO {
+  title: string;
+  text: string;
+}
+
 export interface ArticleDTO {
   id: string;
   slug: string;

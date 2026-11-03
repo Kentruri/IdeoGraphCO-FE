@@ -1,8 +1,10 @@
 import type {
   Article,
+  ArticleClassificationDTO,
   ArticleDTO,
   ArticleDetail,
   ArticleDetailDTO,
+  ArticleIdeology,
   Paginated,
   PaginatedDTO,
 } from "@/types/article";
@@ -12,6 +14,17 @@ import type {
  * the-unbiased-journal-frontend). Si el contrato del backend cambia,
  * solo se toca este archivo.
  */
+
+export function adaptClassification(
+  dto: ArticleClassificationDTO
+): ArticleIdeology {
+  return {
+    predicted: dto.label,
+    probabilities: dto.probabilities,
+    confidence: dto.probabilities[dto.label],
+    modelVersion: dto.model_version,
+  };
+}
 
 export function adaptArticle(dto: ArticleDTO): Article {
   return {
@@ -27,12 +40,7 @@ export function adaptArticle(dto: ArticleDTO): Article {
     publishedAt: dto.published_at,
     imageUrl: dto.image_url,
     readingTimeMinutes: dto.reading_time_minutes,
-    ideology: {
-      predicted: dto.classification.label,
-      probabilities: dto.classification.probabilities,
-      confidence: dto.classification.probabilities[dto.classification.label],
-      modelVersion: dto.classification.model_version,
-    },
+    ideology: adaptClassification(dto.classification),
   };
 }
 
