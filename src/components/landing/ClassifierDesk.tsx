@@ -169,7 +169,7 @@ export function ClassifierDesk({ standalone = false }: { standalone?: boolean })
       <SectionOpen
         as={standalone ? "h1" : "h2"}
         title="Mesa de redacción"
-        lede="Pegue una noticia política colombiana —una nota, un análisis, una columna— y el clasificador repartirá su encuadre entre las ocho clases."
+        lede="Pegue una noticia política colombiana (una nota, un análisis o una columna) y el clasificador repartirá su encuadre entre las ocho clases."
       />
 
       <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-8">
