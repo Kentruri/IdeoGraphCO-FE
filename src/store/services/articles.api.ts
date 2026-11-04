@@ -7,30 +7,32 @@ import {
 import type {
   Article,
   ArticleDetail,
-  ArticleDetailDTO,
-  ArticleDTO,
   ArticleListParams,
   Paginated,
-  PaginatedDTO,
+  PaginatedStoriesDTO,
+  StoryDetailDTO,
 } from "@/types/article";
 
 /**
- * Cliente de la API de noticias (RTK Query).
+ * Cliente de la API de noticias de IdeoGraphCO-BE (RTK Query, contrato v2:
+ * `GET /stories` y `GET /stories/{slug}`).
  *
- * Hoy apunta a las rutas mock de `src/app/api`. Cuando IdeoGraphCO-BE
- * esté disponible, basta con definir NEXT_PUBLIC_API_URL: los DTOs y el
+ * NEXT_PUBLIC_API_URL es la raíz versionada del backend (p. ej.
+ * `https://api.ideographco.dev/api/v1`); sin ella se usa el backend local
+ * de desarrollo (`uvicorn src.api.app:app --port 8000`). Los DTOs y el
  * adapter son el contrato compartido.
  */
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+
 export const articlesApi = createApi({
   reducerPath: "articlesApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL ?? "/api",
-  }),
+  baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
   tagTypes: ["Articles", "ArticleDetail"],
   endpoints: (builder) => ({
     getArticles: builder.query<Paginated<Article>, ArticleListParams>({
       query: ({ page = 1, pageSize = 9, sourceCategory, q } = {}) => ({
-        url: "articles",
+        url: "stories",
         params: {
           page,
           page_size: pageSize,
@@ -38,13 +40,13 @@ export const articlesApi = createApi({
           ...(q ? { q } : {}),
         },
       }),
-      transformResponse: (response: PaginatedDTO<ArticleDTO>) =>
+      transformResponse: (response: PaginatedStoriesDTO) =>
         adaptPaginatedArticles(response),
       providesTags: ["Articles"],
     }),
     getArticleBySlug: builder.query<ArticleDetail, string>({
-      query: (slug) => `articles/${slug}`,
-      transformResponse: (response: ArticleDetailDTO) =>
+      query: (slug) => `stories/${encodeURIComponent(slug)}`,
+      transformResponse: (response: StoryDetailDTO) =>
         adaptArticleDetail(response),
       providesTags: (_result, _error, slug) => [
         { type: "ArticleDetail", id: slug },

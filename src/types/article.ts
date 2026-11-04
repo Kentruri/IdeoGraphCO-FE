@@ -14,11 +14,17 @@ export const SOURCE_CATEGORIES = [
 export type SourceCategory = (typeof SOURCE_CATEGORIES)[number];
 
 /* -------------------------------------------------------------------------
- * DTOs — contrato con la API (hoy mock, mañana IdeoGraphCO-BE).
- * Mantienen snake_case porque así los expondrá el backend.
+ * DTOs — contrato v2 con IdeoGraphCO-BE (`src/schemas/dto.py`, explicado en
+ * su CONTRACT.md). Mantienen snake_case porque así viajan por la API.
+ *
+ * La unidad que se lista es la *story*: agrupa 1..5 artículos de medios
+ * distintos sobre la misma historia. Los campos de la story (título, medio,
+ * clasificación…) son los de su artículo representativo, el primero en
+ * reportar.
  * ---------------------------------------------------------------------- */
 
-export interface ArticleClassificationDTO {
+/** Clasificación ideológica de un artículo (`ClassificationDTO`). */
+export interface ClassificationDTO {
   /** Clase ideológica predicha (argmax de la distribución). */
   label: IdeologyClass;
   /** Distribución softmax sobre las 8 clases; suma 1. */
@@ -32,24 +38,57 @@ export interface ClassifyRequestDTO {
   text: string;
 }
 
-export interface ArticleDTO {
+/** Item de `GET /api/v1/stories` (`StoryListItemDTO`). */
+export interface StoryListItemDTO {
   id: string;
   slug: string;
   title: string;
-  subtitle: string;
+  subtitle: string | null;
   source_name: string;
   source_category: SourceCategory;
   author: string | null;
   published_at: string;
   image_url: string | null;
   reading_time_minutes: number;
-  classification: ArticleClassificationDTO;
+  /** Del representativo; nunca null en el listado. */
+  classification: ClassificationDTO;
+  sources_count: number;
+  has_synthesized: boolean;
 }
 
-export interface ArticleDetailDTO extends ArticleDTO {
-  /** Cuerpo del artículo como lista de párrafos. */
+/**
+ * Artículo de un medio dentro de la story (`SourceArticleDTO`). El público
+ * ve título, snippet y enlace al original, nunca el cuerpo completo.
+ */
+export interface SourceArticleDTO {
+  id: string;
+  source_name: string;
+  source_category: SourceCategory;
+  title: string;
+  /** Primeros ~300 caracteres del artículo. */
+  snippet: string;
+  url: string;
+  author: string | null;
+  published_at: string;
+  /** null mientras la clasificación de esta fuente está pendiente. */
+  classification: ClassificationDTO | null;
+}
+
+/** Noticia sintetizada por IA a partir de ≥3 fuentes (`SynthesizedDTO`). */
+export interface SynthesizedDTO {
+  title: string;
   body: string[];
+  model: string;
+  generated_at: string;
+  disclaimer: string;
+}
+
+/** Respuesta de `GET /api/v1/stories/{slug}` (`StoryDetailDTO`). */
+export interface StoryDetailDTO extends StoryListItemDTO {
   keywords: string[];
+  synthesized: SynthesizedDTO | null;
+  /** Siempre ≥1, cada fuente con su propia clasificación. */
+  sources: SourceArticleDTO[];
 }
 
 export interface PaginatedDTO<T> {
@@ -59,6 +98,9 @@ export interface PaginatedDTO<T> {
   total_items: number;
   total_pages: number;
 }
+
+/** Respuesta de `GET /api/v1/stories` (`PaginatedStoriesDTO`). */
+export type PaginatedStoriesDTO = PaginatedDTO<StoryListItemDTO>;
 
 /* -------------------------------------------------------------------------
  * Modelos de UI — lo que consumen los componentes (camelCase).
@@ -73,11 +115,12 @@ export interface ArticleIdeology {
   modelVersion: string;
 }
 
+/** Noticia del listado: una story vista desde su artículo representativo. */
 export interface Article {
   id: string;
   slug: string;
   title: string;
-  subtitle: string;
+  subtitle: string | null;
   source: {
     name: string;
     category: SourceCategory;
@@ -87,11 +130,39 @@ export interface Article {
   imageUrl: string | null;
   readingTimeMinutes: number;
   ideology: ArticleIdeology;
+  /** Número de medios que cubren la historia. */
+  sourcesCount: number;
+  hasSynthesized: boolean;
+}
+
+/** Cobertura de un medio dentro de la noticia. */
+export interface ArticleSource {
+  id: string;
+  name: string;
+  category: SourceCategory;
+  title: string;
+  snippet: string;
+  url: string;
+  author: string | null;
+  publishedAt: string;
+  /** null mientras la clasificación está pendiente. */
+  ideology: ArticleIdeology | null;
+}
+
+/** Síntesis generada por IA; se muestra siempre con su `disclaimer`. */
+export interface SynthesizedArticle {
+  title: string;
+  body: string[];
+  model: string;
+  generatedAt: string;
+  disclaimer: string;
 }
 
 export interface ArticleDetail extends Article {
-  body: string[];
   keywords: string[];
+  synthesized: SynthesizedArticle | null;
+  /** De la primera fuente en reportar (el representativo) a la última. */
+  sources: ArticleSource[];
 }
 
 export interface Paginated<T> {

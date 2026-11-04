@@ -52,9 +52,11 @@ export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
             {article.title}
           </h2>
 
-          <p className="text-base leading-7 text-pretty text-muted-foreground">
-            {article.subtitle}
-          </p>
+          {article.subtitle && (
+            <p className="text-base leading-7 text-pretty text-muted-foreground">
+              {article.subtitle}
+            </p>
+          )}
 
           <div className="mt-auto space-y-3 pt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">

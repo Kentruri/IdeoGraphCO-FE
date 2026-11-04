@@ -1,12 +1,16 @@
 import type {
   Article,
-  ArticleClassificationDTO,
-  ArticleDTO,
   ArticleDetail,
-  ArticleDetailDTO,
   ArticleIdeology,
+  ArticleSource,
+  ClassificationDTO,
   Paginated,
-  PaginatedDTO,
+  PaginatedStoriesDTO,
+  SourceArticleDTO,
+  StoryDetailDTO,
+  StoryListItemDTO,
+  SynthesizedArticle,
+  SynthesizedDTO,
 } from "@/types/article";
 
 /**
@@ -15,9 +19,7 @@ import type {
  * solo se toca este archivo.
  */
 
-export function adaptClassification(
-  dto: ArticleClassificationDTO
-): ArticleIdeology {
+export function adaptClassification(dto: ClassificationDTO): ArticleIdeology {
   return {
     predicted: dto.label,
     probabilities: dto.probabilities,
@@ -26,7 +28,7 @@ export function adaptClassification(
   };
 }
 
-export function adaptArticle(dto: ArticleDTO): Article {
+export function adaptArticle(dto: StoryListItemDTO): Article {
   return {
     id: dto.id,
     slug: dto.slug,
@@ -41,19 +43,55 @@ export function adaptArticle(dto: ArticleDTO): Article {
     imageUrl: dto.image_url,
     readingTimeMinutes: dto.reading_time_minutes,
     ideology: adaptClassification(dto.classification),
+    sourcesCount: dto.sources_count,
+    hasSynthesized: dto.has_synthesized,
   };
 }
 
-export function adaptArticleDetail(dto: ArticleDetailDTO): ArticleDetail {
+function adaptSource(dto: SourceArticleDTO): ArticleSource {
+  return {
+    id: dto.id,
+    name: dto.source_name,
+    category: dto.source_category,
+    title: dto.title,
+    snippet: dto.snippet,
+    url: dto.url,
+    author: dto.author,
+    publishedAt: dto.published_at,
+    ideology: dto.classification
+      ? adaptClassification(dto.classification)
+      : null,
+  };
+}
+
+function adaptSynthesized(dto: SynthesizedDTO): SynthesizedArticle {
+  return {
+    title: dto.title,
+    body: dto.body,
+    model: dto.model,
+    generatedAt: dto.generated_at,
+    disclaimer: dto.disclaimer,
+  };
+}
+
+export function adaptArticleDetail(dto: StoryDetailDTO): ArticleDetail {
   return {
     ...adaptArticle(dto),
-    body: dto.body,
     keywords: dto.keywords,
+    synthesized: dto.synthesized ? adaptSynthesized(dto.synthesized) : null,
+    // El contrato no fija el orden de `sources`; el representativo es el
+    // primero en reportar, así que el orden cronológico lo deja al frente.
+    sources: dto.sources
+      .map(adaptSource)
+      .sort(
+        (a, b) =>
+          new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime()
+      ),
   };
 }
 
 export function adaptPaginatedArticles(
-  dto: PaginatedDTO<ArticleDTO>
+  dto: PaginatedStoriesDTO
 ): Paginated<Article> {
   return {
     items: dto.items.map(adaptArticle),

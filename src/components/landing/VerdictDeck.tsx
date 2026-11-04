@@ -108,7 +108,7 @@ export function VerdictDeck({ className }: { className?: string }) {
   const cards: DeckCard[] | null = data
     ? data.items.slice(0, 4).map((article) => ({
         headline: article.title,
-        subtitle: article.subtitle,
+        subtitle: article.subtitle ?? undefined,
         source: article.source.name,
         when: formatPublishedAt(article.publishedAt),
         readingMinutes: article.readingTimeMinutes,
@@ -325,7 +325,9 @@ export function VerdictDeck({ className }: { className?: string }) {
           <ChevronRight className="size-4 motion-safe:transition-transform motion-safe:duration-150 motion-safe:ease-out-expo motion-safe:group-hover/button:translate-x-0.5" />
         </Button>
         <p className="font-mono text-[10px] text-muted-foreground">
-          recortes del corpus de demostración
+          {isError && !data
+            ? "mediciones ilustrativas (sin conexión al corpus)"
+            : "recortes recientes del corpus"}
         </p>
       </div>
     </div>

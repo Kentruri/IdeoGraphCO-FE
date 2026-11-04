@@ -60,9 +60,10 @@ export function Footer() {
             , Universidad del Valle.
           </p>
           <p className="text-xs leading-5 text-muted-foreground">
-            Los medios, autores y clasificaciones que se muestran son datos de
-            demostración generados para probar la interfaz; no corresponden a
-            publicaciones reales.
+            Las noticias son publicaciones reales de medios colombianos, con
+            enlace al original. Su clasificación es automática, indica la
+            versión del modelo que la emitió y describe el encuadre del texto,
+            no la veracidad de los hechos.
           </p>
         </div>
       </div>

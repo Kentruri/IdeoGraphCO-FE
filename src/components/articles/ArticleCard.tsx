@@ -56,9 +56,11 @@ export function ArticleCard({ article }: ArticleCardProps) {
             {article.title}
           </h2>
 
-          <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
-            {article.subtitle}
-          </p>
+          {article.subtitle && (
+            <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+              {article.subtitle}
+            </p>
+          )}
 
           <div className="mt-auto pt-3">
             <IdeologyBadge

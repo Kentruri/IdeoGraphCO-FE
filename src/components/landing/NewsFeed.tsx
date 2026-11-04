@@ -19,7 +19,11 @@ import { useGetArticlesQuery } from "@/store/services/articles.api";
 import type { Article } from "@/types/article";
 
 const PAGE_SIZE = 9;
-/** El corpus de demostración cabe en una página del endpoint (26 ≤ 50). */
+/**
+ * Tope de `page_size` en `GET /stories` (MAX_PAGE_SIZE del BE). Los filtros
+ * de ideología y fecha no existen en el backend, así que se aplican aquí
+ * sobre esta ventana: las 50 noticias más recientes.
+ */
 const CORPUS_FETCH_SIZE = 50;
 
 function applyFilters(
@@ -50,9 +54,9 @@ function applyFilters(
 }
 
 /**
- * Sección única de noticias: el corpus completo se trae en una llamada al
- * endpoint existente y los filtros/paginación viven en la capa de UI
- * (sellos de ideología, pestañas de archivo y cierre de edición).
+ * Sección única de noticias: las más recientes se traen en una llamada a
+ * `GET /stories` y los filtros/paginación viven en la capa de UI (sellos de
+ * ideología, pestañas de archivo y cierre de edición).
  */
 export function NewsFeed({ standalone = false }: { standalone?: boolean }) {
   const { data, isLoading, isError, refetch } = useGetArticlesQuery({
