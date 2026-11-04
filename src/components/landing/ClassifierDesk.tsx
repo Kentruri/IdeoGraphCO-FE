@@ -17,9 +17,10 @@ import {
 import { formatProbability } from "@/lib/format";
 import {
   CLASSIFIER_API_URL,
+  toClassifyFailure,
   useClassifyTextMutation,
 } from "@/store/services/classifier.api";
-import type { ArticleIdeology } from "@/types/article";
+import type { ArticleIdeology, NotPoliticalCategory } from "@/types/article";
 import {
   IDEOLOGY_META,
   type IdeologyClass,
@@ -33,6 +34,14 @@ const TITLE_MAX_LENGTH = 300;
 // Compás de imprenta: el veredicto "se compone" antes de estamparse.
 const COMPOSE_MS = 520;
 const USES_MODEL = CLASSIFIER_API_URL !== "";
+
+// Cómo leyó el texto el filtro de politicidad del BE, para completar
+// "El filtro de politicidad lo leyó como …".
+const REJECTED_AS: Record<NotPoliticalCategory, string> = {
+  nonpolitical_article: "una nota no política",
+  biography_static: "un perfil o una biografía",
+  garbage: "un fragmento sin forma de noticia",
+};
 
 interface DeskVerdict {
   predicted: IdeologyClass;
@@ -48,6 +57,9 @@ type DeskState =
   | { phase: "idle" }
   | { phase: "composing" }
   | { phase: "verdict"; verdict: DeskVerdict }
+  // Solo si el BE tiene GEMINI_API_KEY: su filtro dijo que no es una
+  // noticia política colombiana. Sin clave el BE clasifica todo texto.
+  | { phase: "rejected"; category: NotPoliticalCategory; reason: string }
   | { phase: "error" };
 
 function fromModel(ideology: ArticleIdeology): DeskVerdict {
@@ -122,16 +134,25 @@ export function ClassifierDesk({ standalone = false }: { standalone?: boolean })
     setState({ phase: "composing" });
     const started = Date.now();
     try {
-      const ideology = await classifyText({
+      const result = await classifyText({
         title: title.trim(),
         text: text.trim(),
       }).unwrap();
       if (request !== lastRequest.current) return;
       // Si el modelo responde antes del compás, se espera lo que falta.
-      stampAfter(fromModel(ideology), COMPOSE_MS - (Date.now() - started));
-    } catch {
+      stampAfter(fromModel(result), COMPOSE_MS - (Date.now() - started));
+    } catch (error) {
       if (request !== lastRequest.current) return;
-      setState({ phase: "error" });
+      const failure = toClassifyFailure(error);
+      setState(
+        failure.kind === "not_political"
+          ? {
+              phase: "rejected",
+              category: failure.category,
+              reason: failure.reason,
+            }
+          : { phase: "error" }
+      );
     }
   }
 
@@ -148,7 +169,7 @@ export function ClassifierDesk({ standalone = false }: { standalone?: boolean })
       <SectionOpen
         as={standalone ? "h1" : "h2"}
         title="Mesa de redacción"
-        lede="Pegue un texto político —una noticia, un discurso, una columna— y el clasificador repartirá su encuadre entre las ocho clases."
+        lede="Pegue una noticia política colombiana —una nota, un análisis, una columna— y el clasificador repartirá su encuadre entre las ocho clases."
       />
 
       <div className="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-8">
@@ -270,6 +291,31 @@ export function ClassifierDesk({ standalone = false }: { standalone?: boolean })
                 verdict={state.verdict}
                 reduce={reduce ?? false}
               />
+            )}
+
+            {state.phase === "rejected" && (
+              <motion.div
+                key="rejected"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                className="flex h-full min-h-[17rem] flex-col items-center justify-center gap-3 text-center"
+              >
+                <p className="font-display text-xl font-bold tracking-tight">
+                  No parece una noticia política
+                </p>
+                <p className="max-w-xs text-sm leading-6 text-muted-foreground">
+                  El filtro de politicidad lo leyó como{" "}
+                  {REJECTED_AS[state.category]}. La mesa solo clasifica
+                  noticias políticas colombianas: el modelo se entrenó con
+                  ellas y, con otro texto, el resultado no tendría sentido.
+                </p>
+                {state.reason && (
+                  <p className="max-w-xs font-mono text-[11px] leading-5 text-muted-foreground">
+                    motivo del filtro: «{state.reason}»
+                  </p>
+                )}
+              </motion.div>
             )}
 
             {state.phase === "error" && (

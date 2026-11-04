@@ -99,8 +99,12 @@ clasificación del artículo representativo.
 La mesa de redacción (`ClassifierDesk`) clasifica con el modelo del trabajo
 de grado si se define `NEXT_PUBLIC_CLASSIFIER_API_URL` (p. ej.
 `http://localhost:8000/api/v1`): llama a `POST /classify` de IdeoGraphCO-BE,
-que reenvía el texto al servicio de inferencia y no guarda nada. Sin la
-variable usa el léxico de demostración del navegador, y cada veredicto
+que reenvía el texto al servicio de inferencia y no guarda nada. Si el BE
+tiene `GEMINI_API_KEY`, antes pasa el texto por el filtro de politicidad de
+la ingesta, y si este dice que no es una noticia política colombiana (422
+`not_political`) la mesa lo explica en vez de clasificar. Sin clave, el BE
+confía en el usuario y clasifica todo texto.
+Sin la variable usa el léxico de demostración del navegador, y cada veredicto
 declara cuál de los dos lo emitió. Va aparte de `NEXT_PUBLIC_API_URL` porque
 depende del servicio de inferencia; normalmente las dos apuntan al mismo
 backend.

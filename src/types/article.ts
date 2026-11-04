@@ -38,6 +38,32 @@ export interface ClassifyRequestDTO {
   text: string;
 }
 
+/**
+ * Respuesta 200 de `POST /api/v1/classify` (`ClassifyResponseDTO`). El filtro
+ * de politicidad del BE es opcional: `disabled` sin GEMINI_API_KEY (se confía
+ * en el usuario), `passed` si confirmó que es una noticia política colombiana,
+ * `unavailable` si falló y se clasificó sin él. La mesa no lo muestra.
+ */
+export interface ClassifyResponseDTO extends ClassificationDTO {
+  political_filter: "disabled" | "passed" | "unavailable";
+}
+
+/** Categoría del filtro de politicidad cuando el texto no es del dominio. */
+export type NotPoliticalCategory =
+  | "nonpolitical_article"
+  | "biography_static"
+  | "garbage";
+
+/** 422 de `POST /api/v1/classify`: el filtro rechazó el texto (`NotPoliticalErrorDTO`). */
+export interface NotPoliticalErrorDTO {
+  detail: string;
+  code: "not_political";
+  category: NotPoliticalCategory;
+  confidence: number | null;
+  /** Motivo en ≤ 12 palabras, escrito por el filtro. */
+  reason: string;
+}
+
 /** Item de `GET /api/v1/stories` (`StoryListItemDTO`). */
 export interface StoryListItemDTO {
   id: string;
