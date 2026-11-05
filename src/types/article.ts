@@ -105,13 +105,15 @@ export interface SourceArticleDTO {
   classification: ClassificationDTO | null;
 }
 
-/** Noticia sintetizada por IA a partir de ≥3 fuentes (`SynthesizedDTO`). */
+/** Noticia sintética por triangulación de ≥3 medios (`SynthesizedDTO`). */
 export interface SynthesizedDTO {
   title: string;
   body: string[];
   model: string;
   generated_at: string;
   disclaimer: string;
+  /** Encuadre de la síntesis según el mismo clasificador (opcional). */
+  classification?: ClassificationDTO | null;
 }
 
 /** Respuesta de `GET /api/v1/stories/{slug}` (`StoryDetailDTO`). */
@@ -182,13 +184,19 @@ export interface ArticleSource {
   ideology: ArticleIdeology | null;
 }
 
-/** Síntesis generada por IA; se muestra siempre con su `disclaimer`. */
+/**
+ * Versión triangulada: texto sintético redactado por IA a partir de los
+ * medios de la historia. Se muestra siempre con su `disclaimer` y después
+ * de la noticia original, que es la que se clasificó.
+ */
 export interface SynthesizedArticle {
   title: string;
   body: string[];
   model: string;
   generatedAt: string;
   disclaimer: string;
+  /** Cómo lee el clasificador la versión triangulada (null si no se pudo). */
+  ideology: ArticleIdeology | null;
 }
 
 export interface ArticleDetail extends Article {

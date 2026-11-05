@@ -5,7 +5,7 @@ import { Stamp } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { IdeologyDistribution } from "@/components/ideology/IdeologyDistribution";
-import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
+import { IdeologyHeatmap } from "@/components/ideology/IdeologyHeatmap";
 import { SectionOpen } from "@/components/landing/SectionOpen";
 import { CountUp } from "@/components/motion/CountUp";
 import { Button } from "@/components/ui/button";
@@ -380,9 +380,12 @@ function VerdictSheet({
         </p>
       </div>
 
-      <IdeologyStrip
+      <IdeologyHeatmap
+        className="my-6 border-y border-border py-6"
         probabilities={verdict.distribution}
-        className="my-5 h-2"
+        focus={verdict.predicted}
+        label="Mapa de calor del veredicto por clase"
+        showDescription={false}
       />
 
       <IdeologyDistribution

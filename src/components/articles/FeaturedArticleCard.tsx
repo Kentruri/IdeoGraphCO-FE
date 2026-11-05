@@ -46,6 +46,12 @@ export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
             <time dateTime={article.publishedAt}>
               {formatPublishedAt(article.publishedAt)}
             </time>
+            {article.hasSynthesized && (
+              <span className="text-foreground">
+                {" "}
+                · triangulada, {article.sourcesCount} medios
+              </span>
+            )}
           </p>
 
           <h2 className="font-display text-3xl font-extrabold leading-[1.02] tracking-tight text-balance md:text-4xl lg:text-[2.75rem]">

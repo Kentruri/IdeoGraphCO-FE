@@ -81,6 +81,9 @@ function adaptSynthesized(dto: SynthesizedDTO): SynthesizedArticle {
     model: dto.model,
     generatedAt: dto.generated_at,
     disclaimer: dto.disclaimer,
+    ideology: dto.classification
+      ? adaptClassification(dto.classification)
+      : null,
   };
 }
 

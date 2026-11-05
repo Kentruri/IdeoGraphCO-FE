@@ -50,6 +50,12 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <time dateTime={article.publishedAt}>
               {formatPublishedAt(article.publishedAt)}
             </time>
+            {article.hasSynthesized && (
+              <span className="text-foreground">
+                {" "}
+                · triangulada, {article.sourcesCount} medios
+              </span>
+            )}
           </p>
 
           <h2 className="font-display text-lg font-bold leading-snug tracking-tight">

@@ -5,10 +5,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
 
+import { SourceItem } from "@/components/articles/SourceItem";
+import { TriangulatedStory } from "@/components/articles/TriangulatedStory";
 import { ErrorState } from "@/components/feedback/States";
 import { IdeologyAxes } from "@/components/ideology/IdeologyAxes";
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyDistribution } from "@/components/ideology/IdeologyDistribution";
+import { IdeologyHeatmap } from "@/components/ideology/IdeologyHeatmap";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
 import { CountUp } from "@/components/motion/CountUp";
 import { ArticleDetailSkeleton } from "@/components/skeletons/ArticleDetailSkeleton";
@@ -17,7 +20,6 @@ import { formatConfidence, formatDate } from "@/lib/format";
 import { getSourceCategoryMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { useGetArticleBySlugQuery } from "@/store/services/articles.api";
-import type { ArticleSource } from "@/types/article";
 import { IDEOLOGY_META } from "@/types/ideology";
 
 /** Capitular editorial del primer párrafo de la lectura. */
@@ -111,86 +113,93 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
               </figure>
             )}
 
-            {/* Lectura: la síntesis si existe; si no, el snippet del primer
-                medio y el enlace al original (CONTRACT.md del BE, regla 1). */}
-            {article.synthesized ? (
-              <section aria-label="Síntesis generada por IA" className="max-w-prose">
-                <p className="mb-8 border-l-2 border-foreground/40 pl-3 font-mono text-xs leading-5 text-muted-foreground">
-                  {article.synthesized.disclaimer}
+            {/* Lectura: la noticia original, la que se clasificó (snippet
+                del primer medio y enlace al original, CONTRACT.md regla 1).
+                La versión triangulada, si existe, va después del mapa. */}
+            {lead && (
+              <div className="max-w-prose space-y-6">
+                <p className={cn("font-serif text-lg leading-8", DROP_CAP)}>
+                  {lead.snippet}
                 </p>
-                {article.synthesized.title !== article.title && (
-                  <h2 className="mb-6 font-serif text-2xl font-semibold leading-tight text-balance">
-                    {article.synthesized.title}
-                  </h2>
-                )}
-                <div className="space-y-6">
-                  {article.synthesized.body.map((paragraph, index) => (
-                    <p
-                      key={index}
-                      className={cn(
-                        "font-serif text-lg leading-8",
-                        index === 0 && DROP_CAP
-                      )}
-                    >
-                      {paragraph}
-                    </p>
-                  ))}
-                </div>
-                <p className="mt-6 font-mono text-[11px] text-muted-foreground">
-                  Síntesis de {article.sourcesCount} fuentes con{" "}
-                  {article.synthesized.model} ·{" "}
-                  <time dateTime={article.synthesized.generatedAt}>
-                    {formatDate(article.synthesized.generatedAt)}
-                  </time>
-                </p>
-              </section>
-            ) : (
-              lead && (
-                <div className="max-w-prose space-y-6">
-                  <p className={cn("font-serif text-lg leading-8", DROP_CAP)}>
-                    {lead.snippet}
-                  </p>
-                  <Button asChild variant="outline">
-                    <a href={lead.url} target="_blank" rel="noopener noreferrer">
-                      Leer en {lead.name}
-                      <ArrowUpRight aria-hidden />
-                      <span className="sr-only">
-                        (se abre en una pestaña nueva)
-                      </span>
-                    </a>
-                  </Button>
-                </div>
-              )
+                <Button asChild variant="outline">
+                  <a href={lead.url} target="_blank" rel="noopener noreferrer">
+                    Leer en {lead.name}
+                    <ArrowUpRight aria-hidden />
+                    <span className="sr-only">
+                      (se abre en una pestaña nueva)
+                    </span>
+                  </a>
+                </Button>
+              </div>
             )}
 
-            {article.sources.length > 1 && (
-              <section
-                aria-labelledby="cobertura"
-                className="mt-12 border-t border-border pt-8"
-              >
+            {/* Mapa de calor 3D de la noticia: se recorre girándolo. */}
+            <section
+              id="mapa-de-calor"
+              aria-labelledby="mapa-de-calor-titulo"
+              className="rule-double mt-16 scroll-mt-header pt-6"
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <h2
-                  id="cobertura"
+                  id="mapa-de-calor-titulo"
                   className="font-display text-2xl font-bold tracking-tight"
                 >
-                  Cobertura
+                  Mapa de calor ideológico
                 </h2>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  <span className="tabular-nums">{article.sources.length}</span>{" "}
-                  medios cubren esta historia, cada uno con su propia
-                  clasificación.
+                <p className="font-mono text-[11px] text-muted-foreground">
+                  modelo {article.ideology.modelVersion}
                 </p>
-                <ol className="mt-4 divide-y divide-border">
-                  {article.sources.map((source, index) => (
-                    <SourceItem
-                      key={source.id}
-                      source={source}
-                      // El snippet del primer medio ya es la lectura principal
-                      // cuando no hay síntesis.
-                      showSnippet={article.synthesized !== null || index > 0}
-                    />
-                  ))}
-                </ol>
-              </section>
+              </div>
+              <p className="mt-1.5 max-w-prose text-sm leading-6 text-muted-foreground">
+                Cada colina es una de las 8 clases, frente a su opuesta. Su
+                altura y su color crecen con la probabilidad que el modelo le
+                da a la noticia original de {lead?.name ?? article.source.name}.
+              </p>
+              <IdeologyHeatmap
+                className="mt-5"
+                probabilities={article.ideology.probabilities}
+                focus={article.ideology.predicted}
+                label="Clases del mapa de calor"
+              />
+            </section>
+
+            {article.synthesized ? (
+              <TriangulatedStory
+                synthesized={article.synthesized}
+                sources={article.sources}
+              />
+            ) : (
+              article.sources.length > 1 && (
+                <section
+                  aria-labelledby="cobertura"
+                  className="rule-double mt-16 pt-6"
+                >
+                  <h2
+                    id="cobertura"
+                    className="font-display text-2xl font-bold tracking-tight"
+                  >
+                    Cobertura
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    <span className="tabular-nums">
+                      {article.sources.length}
+                    </span>{" "}
+                    medios cubren esta historia, cada uno con su propia
+                    clasificación.
+                  </p>
+                  <ol className="mt-4 divide-y divide-border">
+                    {article.sources.map((source, index) => (
+                      <SourceItem
+                        key={source.id}
+                        source={source}
+                        // El snippet del primer medio ya es la lectura principal.
+                        showSnippet={index > 0}
+                        note={index === 0 ? "noticia clasificada" : undefined}
+                      />
+                    ))}
+                  </ol>
+                </section>
+              )
             )}
 
             {article.keywords.length > 0 && (
@@ -273,69 +282,5 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
         </div>
       )}
     </div>
-  );
-}
-
-/** Un medio de la cobertura: enlace al original y su propia clasificación. */
-function SourceItem({
-  source,
-  showSnippet,
-}: {
-  source: ArticleSource;
-  showSnippet: boolean;
-}) {
-  return (
-    <li className="py-5">
-      <p className="font-mono text-xs text-muted-foreground">
-        {source.name} ·{" "}
-        {getSourceCategoryMeta(source.category)?.label ?? source.category} ·{" "}
-        <time dateTime={source.publishedAt}>
-          {formatDate(source.publishedAt)}
-        </time>
-      </p>
-      <h3 className="mt-1.5 font-serif text-lg font-semibold leading-snug text-pretty">
-        <a
-          href={source.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="rounded-sm underline-offset-4 outline-none transition-colors duration-150 ease-out-expo hover:underline focus-visible:ring-2 focus-visible:ring-ring/60"
-        >
-          {source.title}
-          <ArrowUpRight
-            aria-hidden
-            className="ml-1 inline size-4 align-[-0.125em] text-muted-foreground"
-          />
-          <span className="sr-only">(se abre en una pestaña nueva)</span>
-        </a>
-      </h3>
-      {source.author && (
-        <p className="mt-1 text-xs text-muted-foreground">
-          Por {source.author}
-        </p>
-      )}
-      {showSnippet && (
-        <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
-          {source.snippet}
-        </p>
-      )}
-      <div className="mt-3">
-        {source.ideology ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <IdeologyBadge
-              ideologyClass={source.ideology.predicted}
-              confidence={source.ideology.confidence}
-            />
-            <IdeologyStrip
-              probabilities={source.ideology.probabilities}
-              className="w-40"
-            />
-          </div>
-        ) : (
-          <p className="font-mono text-xs text-muted-foreground">
-            Clasificación pendiente
-          </p>
-        )}
-      </div>
-    </li>
   );
 }
