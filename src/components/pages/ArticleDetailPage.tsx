@@ -151,9 +151,9 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
                 </p>
               </div>
               <p className="mt-1.5 max-w-prose text-sm leading-6 text-muted-foreground">
-                Cada colina es una de las 8 clases, frente a su opuesta. Su
-                altura y su color crecen con la probabilidad que el modelo le
-                da a la noticia original de {lead?.name ?? article.source.name}.
+                Cada punta es una de las 8 clases, frente a su opuesta. Su
+                largo y su color crecen con la probabilidad que el modelo le da
+                a la noticia original de {lead?.name ?? article.source.name}.
               </p>
               <IdeologyHeatmap
                 className="mt-5"

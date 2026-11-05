@@ -148,12 +148,14 @@
 
   /* Rampa del mapa de calor (IdeologyHeatmap): codifica probabilidad, no
      clase. Frío en el centro (0 %), cálido en las crestas (100 %). Nunca va
-     sola: el radio y la cifra escrita dicen lo mismo. */
-  --heat-0: oklch(0.8 0.065 246);
-  --heat-1: oklch(0.74 0.11 208);
-  --heat-2: oklch(0.88 0.15 100);
-  --heat-3: oklch(0.75 0.17 56);
-  --heat-4: oklch(0.6 0.21 28);
+     sola: el radio y la cifra escrita dicen lo mismo. Extremos profundos
+     (azul intenso, rojo oscuro) y un paso tibio claro en el medio, sin
+     amarillo ni celeste pálidos: así no se ve pastel. */
+  --heat-0: oklch(0.46 0.2 264);
+  --heat-1: oklch(0.64 0.15 245);
+  --heat-2: oklch(0.8 0.12 72);
+  --heat-3: oklch(0.64 0.2 40);
+  --heat-4: oklch(0.47 0.19 27);
   /* Isotermas: los anillos de la retícula, en papel, dentro del calor. */
   --heat-iso: oklch(0.99 0.004 85 / 0.6);
 }
@@ -169,11 +171,11 @@
   --ideology-progresismo: #9085e9;
   --ideology-personalismo: #e66767;
 
-  --heat-0: oklch(0.4 0.085 256);
-  --heat-1: oklch(0.67 0.12 210);
-  --heat-2: oklch(0.84 0.15 100);
-  --heat-3: oklch(0.72 0.17 54);
-  --heat-4: oklch(0.62 0.21 28);
+  --heat-0: oklch(0.5 0.2 264);
+  --heat-1: oklch(0.66 0.15 245);
+  --heat-2: oklch(0.8 0.12 72);
+  --heat-3: oklch(0.66 0.2 40);
+  --heat-4: oklch(0.55 0.2 27);
   --heat-iso: oklch(0.146 0.005 80 / 0.5);
 
   /* Tema oscuro "cuarto de mapas": grafito cálido, nunca negro puro.

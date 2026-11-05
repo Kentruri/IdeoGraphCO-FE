@@ -19,9 +19,9 @@ import {
   type IdeologyDistribution,
 } from "@/types/ideology";
 
-/** El relieve 3D (three.js) solo se descarga donde se usa, y nunca en SSR. */
-const IdeologyTerrain = dynamic(
-  () => import("@/components/ideology/IdeologyTerrain"),
+/** El radar 3D (three.js) solo se descarga donde se usa, y nunca en SSR. */
+const IdeologyRadar3D = dynamic(
+  () => import("@/components/ideology/IdeologyRadar3D"),
   {
     ssr: false,
     loading: () => (
@@ -45,11 +45,13 @@ interface IdeologyHeatmapProps {
 }
 
 /**
- * Mapa de calor 3D de la distribución ideológica de una noticia: una colina
- * por clase, enfrentada a su opuesta, cuya altura y color crecen con la
- * probabilidad. Se recorre girando la cámara; fijar una clase (clic,
- * flechas) la lleva al frente y la lectura de abajo la explica. Sin WebGL
- * cae a la vista cenital 2D, con la misma interacción.
+ * Mapa de calor 3D de la distribución ideológica de una noticia: una
+ * estrella con volumen que nace de un núcleo lleno, con una punta por clase
+ * enfrentada a su opuesta, cuyo largo y color crecen con la probabilidad,
+ * sobre un plato con anillos y dentro de una caja con rejilla en los tres
+ * planos. Se recorre girando la cámara; el puntero, el clic o las
+ * flechas eligen la clase que explica la lectura de abajo. Sin WebGL cae
+ * al radar 2D, con la misma interacción.
  */
 export function IdeologyHeatmap({
   probabilities,
@@ -158,7 +160,7 @@ export function IdeologyHeatmap({
             renderLabel={renderLabel}
           />
         ) : (
-          <IdeologyTerrain
+          <IdeologyRadar3D
             probabilities={probabilities}
             active={active}
             focus={pinned}
@@ -207,7 +209,7 @@ export function IdeologyHeatmap({
   );
 }
 
-/** Escala de calor: mismas paradas (y la misma raíz) que el relieve. */
+/** Escala de calor: mismas paradas (y la misma raíz) que el radar. */
 function HeatLegend({ flat }: { flat: boolean }) {
   return (
     <div className="border-t border-border pt-4">
@@ -242,7 +244,7 @@ function HeatLegend({ flat }: { flat: boolean }) {
       <p className="mt-3 text-[11px] leading-5 text-muted-foreground">
         {flat
           ? "El radio crece con la raíz cuadrada de la probabilidad, así las clases pequeñas siguen a la vista. El anillo discontinuo marca el reparto uniforme (12,5 %)."
-          : "La altura crece con la raíz cuadrada de la probabilidad, así las clases pequeñas siguen a la vista. Las curvas de nivel marcan 5, 12,5 (reparto uniforme), 25 y 50 %."}
+          : "Cada punta nace del núcleo (0 %) y crece con la raíz cuadrada de la probabilidad, así las clases pequeñas siguen a la vista; el anillo discontinuo marca el reparto uniforme (12,5 %) y el color va del azul del centro (0 %) al rojo (100 %)."}
       </p>
     </div>
   );
