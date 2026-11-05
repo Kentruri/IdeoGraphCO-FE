@@ -15,55 +15,39 @@ import {
 import { SectionOpen } from "@/components/landing/SectionOpen";
 import { Button } from "@/components/ui/button";
 import { ArticleGridSkeleton } from "@/components/skeletons/ArticleCardSkeleton";
+import { cn } from "@/lib/utils";
 import { useGetArticlesQuery } from "@/store/services/articles.api";
-import type { Article } from "@/types/article";
+import type { ArticleListParams } from "@/types/article";
 
 const PAGE_SIZE = 9;
-/**
- * Tope de `page_size` en `GET /stories` (MAX_PAGE_SIZE del BE). Los filtros
- * de ideología y fecha no existen en el backend, así que se aplican aquí
- * sobre esta ventana: las 50 noticias más recientes.
- */
-const CORPUS_FETCH_SIZE = 50;
 
-function applyFilters(
-  articles: Article[],
-  filters: NewsFiltersValue
-): Article[] {
-  const fromTime = filters.from ? new Date(`${filters.from}T00:00:00`) : null;
-  const toTime = filters.to ? new Date(`${filters.to}T23:59:59`) : null;
+/** Instante UTC (ISO) de una hora local del día `YYYY-MM-DD` del navegador. */
+function localDayBound(day: string, time: string): string | undefined {
+  if (!day) return undefined;
+  const instant = new Date(`${day}T${time}`);
+  return Number.isNaN(instant.getTime()) ? undefined : instant.toISOString();
+}
 
-  return articles.filter((article) => {
-    if (
-      filters.ideologies.length > 0 &&
-      !filters.ideologies.includes(article.ideology.predicted)
-    ) {
-      return false;
-    }
-    if (
-      filters.category !== "todas" &&
-      article.source.category !== filters.category
-    ) {
-      return false;
-    }
-    const published = new Date(article.publishedAt);
-    if (fromTime && published < fromTime) return false;
-    if (toTime && published > toTime) return false;
-    return true;
-  });
+/** Filtros de la UI → parámetros de `GET /stories` (los aplica el servidor). */
+function toListParams(filters: NewsFiltersValue): ArticleListParams {
+  return {
+    sourceCategory: filters.category === "todas" ? undefined : filters.category,
+    // Ordenadas: la misma selección comparte caché sin importar el orden de clic
+    ideologies:
+      filters.ideologies.length > 0 ? [...filters.ideologies].sort() : undefined,
+    // Días del navegador, de su medianoche al último milisegundo
+    publishedFrom: localDayBound(filters.from, "00:00:00"),
+    publishedTo: localDayBound(filters.to, "23:59:59.999"),
+  };
 }
 
 /**
- * Sección única de noticias: las más recientes se traen en una llamada a
- * `GET /stories` y los filtros/paginación viven en la capa de UI (sellos de
- * ideología, pestañas de archivo y cierre de edición).
+ * Sección única de noticias con paginación de servidor: cada cambio de
+ * filtro (sellos de ideología, pestañas de archivo, cierre de edición) o de
+ * página es una petición a `GET /stories`, y el contador y las páginas salen
+ * de `totalItems`/`totalPages`, así que recorren todo el corpus.
  */
 export function NewsFeed({ standalone = false }: { standalone?: boolean }) {
-  const { data, isLoading, isError, refetch } = useGetArticlesQuery({
-    page: 1,
-    pageSize: CORPUS_FETCH_SIZE,
-  });
-
   const [filters, setFiltersState] = useState<NewsFiltersValue>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
 
@@ -72,20 +56,25 @@ export function NewsFeed({ standalone = false }: { standalone?: boolean }) {
     setPage(1);
   };
 
-  const filtered = useMemo(
-    () => applyFilters(data?.items ?? [], filters),
-    [data, filters]
-  );
-
   const filtering = hasActiveFilters(filters);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage = Math.min(page, totalPages);
-  const pageItems = filtered.slice(
-    (safePage - 1) * PAGE_SIZE,
-    safePage * PAGE_SIZE
-  );
-  const featured = !filtering && safePage === 1 ? pageItems[0] : undefined;
-  const gridItems = featured ? pageItems.slice(1) : pageItems;
+  const listParams = useMemo(() => toListParams(filters), [filters]);
+
+  // `data` conserva la respuesta anterior mientras llega la nueva: la página
+  // no salta a un esqueleto en cada clic, solo se atenúa.
+  const { data, isLoading, isFetching, isError, refetch } =
+    useGetArticlesQuery({ ...listParams, page, pageSize: PAGE_SIZE });
+  // Total del corpus para «N de M»: la página 1 sin filtros, la misma
+  // consulta (y caché) que la vista sin filtros.
+  const { data: corpus } = useGetArticlesQuery({
+    page: 1,
+    pageSize: PAGE_SIZE,
+  });
+
+  const items = data?.items ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const currentPage = Math.min(page, totalPages);
+  const featured = !filtering && data?.page === 1 ? items[0] : undefined;
+  const gridItems = featured ? items.slice(1) : items;
 
   const changePage = (newPage: number) => {
     setPage(newPage);
@@ -116,9 +105,11 @@ export function NewsFeed({ standalone = false }: { standalone?: boolean }) {
               aria-live="polite"
               className="font-mono text-sm tabular-nums text-muted-foreground"
             >
-              {filtering
-                ? `${filtered.length} de ${data.totalItems} noticias`
-                : `${data.totalItems} noticias analizadas`}
+              {!filtering
+                ? `${data.totalItems} noticias analizadas`
+                : corpus
+                  ? `${data.totalItems} de ${corpus.totalItems} noticias`
+                  : `${data.totalItems} noticias`}
             </p>
           ) : undefined
         }
@@ -133,7 +124,7 @@ export function NewsFeed({ standalone = false }: { standalone?: boolean }) {
 
         {isError && <ErrorState onRetry={refetch} />}
 
-        {data && filtered.length === 0 && (
+        {!isError && data && items.length === 0 && (
           <EmptyState
             title={
               filtering
@@ -158,12 +149,18 @@ export function NewsFeed({ standalone = false }: { standalone?: boolean }) {
           />
         )}
 
-        {filtered.length > 0 && (
-          <div className="space-y-16">
+        {!isError && items.length > 0 && (
+          <div
+            aria-busy={isFetching}
+            className={cn(
+              "space-y-16 transition-opacity duration-150 ease-out-expo",
+              isFetching && "opacity-60"
+            )}
+          >
             {featured && <FeaturedArticleCard article={featured} />}
             <ArticleGrid articles={gridItems} />
             <PaginationControls
-              page={safePage}
+              page={currentPage}
               totalPages={totalPages}
               onPageChange={changePage}
             />

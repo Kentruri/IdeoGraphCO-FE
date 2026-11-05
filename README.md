@@ -80,9 +80,16 @@ UI (cards, distribución ideológica, cobertura por fuente, paginación)
 ```
 
 La búsqueda (`/buscar`) usa el `q` del backend (título, subtítulo y medio,
-sin tildes ni mayúsculas). En `/noticias`, los filtros de ideología, fuente y
-fecha se aplican en la UI sobre las 50 noticias más recientes (el tope de
-`page_size`), porque el backend no filtra por ideología ni por fecha.
+sin tildes ni mayúsculas). En `/noticias`, los filtros y la paginación los
+resuelve el backend: cada cambio de filtro o de página es una petición a
+`GET /stories` con `page`, `page_size=9`, `source_category`, `ideology` (una
+clave por cada sello marcado) y `published_from`/`published_to`. El contador
+y las páginas salen de `totalItems`/`totalPages`, así que recorren todo el
+corpus. El rango de fechas usa días del navegador: el FE envía en UTC el
+instante de las 00:00 del «desde» y el de las 23:59:59,999 del «hasta».
+Con filtros activos, el contador dice «N de M noticias»; M es el total de la
+página 1 sin filtros, la misma consulta (y la misma caché) de la vista sin
+filtros.
 
 ### Detalle de una noticia
 

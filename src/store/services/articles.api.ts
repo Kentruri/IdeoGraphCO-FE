@@ -31,15 +31,28 @@ export const articlesApi = createApi({
   tagTypes: ["Articles", "ArticleDetail"],
   endpoints: (builder) => ({
     getArticles: builder.query<Paginated<Article>, ArticleListParams>({
-      query: ({ page = 1, pageSize = 9, sourceCategory, q } = {}) => ({
-        url: "stories",
-        params: {
-          page,
-          page_size: pageSize,
-          ...(sourceCategory ? { source_category: sourceCategory } : {}),
-          ...(q ? { q } : {}),
-        },
-      }),
+      query: ({
+        page = 1,
+        pageSize = 9,
+        sourceCategory,
+        ideologies = [],
+        publishedFrom,
+        publishedTo,
+        q,
+      } = {}) => {
+        const params = new URLSearchParams({
+          page: String(page),
+          page_size: String(pageSize),
+        });
+        if (sourceCategory) params.set("source_category", sourceCategory);
+        // Una clave por clase (?ideology=a&ideology=b): `params` como objeto
+        // uniría el arreglo con comas.
+        for (const ideology of ideologies) params.append("ideology", ideology);
+        if (publishedFrom) params.set("published_from", publishedFrom);
+        if (publishedTo) params.set("published_to", publishedTo);
+        if (q) params.set("q", q);
+        return `stories?${params.toString()}`;
+      },
       transformResponse: (response: PaginatedStoriesDTO) =>
         adaptPaginatedArticles(response),
       providesTags: ["Articles"],

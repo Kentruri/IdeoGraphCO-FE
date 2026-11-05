@@ -19,6 +19,16 @@ import type {
  * solo se toca este archivo.
  */
 
+/**
+ * Nombre del medio para la UI. Si falta `source_display_name` (un BE
+ * anterior al campo), se muestra el slug antes que dejarlo vacío.
+ */
+function sourceDisplayName(
+  dto: Pick<StoryListItemDTO, "source_name" | "source_display_name">
+): string {
+  return dto.source_display_name?.trim() || dto.source_name;
+}
+
 export function adaptClassification(dto: ClassificationDTO): ArticleIdeology {
   return {
     predicted: dto.label,
@@ -35,7 +45,7 @@ export function adaptArticle(dto: StoryListItemDTO): Article {
     title: dto.title,
     subtitle: dto.subtitle,
     source: {
-      name: dto.source_name,
+      name: sourceDisplayName(dto),
       category: dto.source_category,
     },
     author: dto.author,
@@ -51,7 +61,7 @@ export function adaptArticle(dto: StoryListItemDTO): Article {
 function adaptSource(dto: SourceArticleDTO): ArticleSource {
   return {
     id: dto.id,
-    name: dto.source_name,
+    name: sourceDisplayName(dto),
     category: dto.source_category,
     title: dto.title,
     snippet: dto.snippet,

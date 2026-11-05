@@ -70,9 +70,13 @@ export interface StoryListItemDTO {
   slug: string;
   title: string;
   subtitle: string | null;
+  /** Slug del medio en el catálogo del BE (`lasillavacia`). */
   source_name: string;
+  /** Nombre del medio para mostrar (`La Silla Vacía`). */
+  source_display_name: string;
   source_category: SourceCategory;
   author: string | null;
+  /** ISO 8601 en UTC con zona (`2026-07-30T12:21:00Z`). */
   published_at: string;
   image_url: string | null;
   reading_time_minutes: number;
@@ -89,6 +93,7 @@ export interface StoryListItemDTO {
 export interface SourceArticleDTO {
   id: string;
   source_name: string;
+  source_display_name: string;
   source_category: SourceCategory;
   title: string;
   /** Primeros ~300 caracteres del artículo. */
@@ -148,6 +153,7 @@ export interface Article {
   title: string;
   subtitle: string | null;
   source: {
+    /** Nombre legible del medio (`source_display_name`). */
     name: string;
     category: SourceCategory;
   };
@@ -164,6 +170,7 @@ export interface Article {
 /** Cobertura de un medio dentro de la noticia. */
 export interface ArticleSource {
   id: string;
+  /** Nombre legible del medio (`source_display_name`). */
   name: string;
   category: SourceCategory;
   title: string;
@@ -199,10 +206,24 @@ export interface Paginated<T> {
   totalPages: number;
 }
 
-/** Parámetros de listado que acepta la API. */
+/**
+ * Parámetros de listado que acepta la API (`GET /stories`). Los filtros se
+ * aplican en el servidor y se combinan con Y; `totalItems`/`totalPages`
+ * cuentan lo filtrado.
+ */
 export interface ArticleListParams {
   page?: number;
+  /** 1 a 50 (MAX_PAGE_SIZE del BE). */
   pageSize?: number;
   sourceCategory?: SourceCategory;
+  /** Clase predicha del representativo; basta con que coincida una. */
+  ideologies?: IdeologyClass[];
+  /**
+   * Límites inclusivos sobre `published_at`: un instante ISO 8601
+   * (`2026-07-01T05:00:00.000Z`) o una fecha `YYYY-MM-DD`, que el BE toma
+   * como día UTC. Para días locales se envían los instantes de la medianoche.
+   */
+  publishedFrom?: string;
+  publishedTo?: string;
   q?: string;
 }
