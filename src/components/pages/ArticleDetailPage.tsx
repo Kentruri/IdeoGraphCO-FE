@@ -16,7 +16,7 @@ import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
 import { CountUp } from "@/components/motion/CountUp";
 import { ArticleDetailSkeleton } from "@/components/skeletons/ArticleDetailSkeleton";
 import { Button } from "@/components/ui/button";
-import { formatConfidence, formatDate } from "@/lib/format";
+import { formatDate, formatProbability } from "@/lib/format";
 import { getSourceCategoryMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { useGetArticleBySlugQuery } from "@/store/services/articles.api";
@@ -240,14 +240,18 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
               </div>
 
               <div className="mt-6 flex items-baseline gap-3 border-t border-border pt-5">
-                <p className="font-mono text-4xl font-semibold tabular-nums">
+                {/* Es la probabilidad (softmax) que el modelo asigna a la clase
+                    predicha, sin calibrar: no se presenta como «confianza»
+                    ni como probabilidad de acierto. Con un decimal, igual que
+                    la lista, para que no se lea como certeza. */}
+                <p className="shrink-0 whitespace-nowrap font-mono text-4xl font-semibold tabular-nums">
                   <CountUp
                     value={article.ideology.confidence}
-                    format={formatConfidence}
+                    format={formatProbability}
                   />
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  de confianza del modelo
+                  de probabilidad según el modelo
                 </p>
               </div>
 

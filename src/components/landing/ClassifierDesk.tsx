@@ -83,7 +83,7 @@ function fromDemo(demo: DemoVerdict): DeskVerdict {
 /**
  * Mesa de redacción: el corazón del producto en la portada. El usuario
  * pega un texto político y recibe el veredicto editorial (clase predicha,
- * confianza y distribución). Con NEXT_PUBLIC_CLASSIFIER_API_URL lo emite el
+ * probabilidad y distribución). Con NEXT_PUBLIC_CLASSIFIER_API_URL lo emite el
  * modelo del trabajo de grado a través de IdeoGraphCO-BE; sin ella, el
  * léxico de demostración del navegador. El veredicto declara cuál fue.
  */
@@ -375,7 +375,7 @@ function VerdictSheet({
           {origin.kind === "model"
             ? "de probabilidad según el modelo"
             : origin.hasSignals
-              ? "de confianza del léxico de demostración"
+              ? "de probabilidad según el léxico de demostración"
               : "sin señales claras: distribución casi uniforme"}
         </p>
       </div>
