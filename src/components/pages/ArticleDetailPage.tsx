@@ -1,10 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
+import { NewsImage } from "@/components/articles/NewsImage";
 import { SourceItem } from "@/components/articles/SourceItem";
 import { TriangulatedStory } from "@/components/articles/TriangulatedStory";
 import { ErrorState } from "@/components/feedback/States";
@@ -33,6 +34,8 @@ interface ArticleDetailPageProps {
 export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
   const { data: article, isLoading, isError, error, refetch } =
     useGetArticleBySlugQuery(slug);
+  // URL de la foto que no cargó por ninguna vía: su figura se oculta entera.
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
 
   if (isError && "status" in error && error.status === 404) {
     notFound();
@@ -95,16 +98,17 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
               )}
             </header>
 
-            {article.imageUrl && (
+            {article.imageUrl && article.imageUrl !== failedImageUrl && (
               <figure className="my-10">
                 <div className="relative aspect-video w-full border border-border bg-muted">
-                  <Image
+                  <NewsImage
                     src={article.imageUrl}
                     alt=""
                     fill
                     priority
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     className="object-cover dark:opacity-90"
+                    onFail={() => setFailedImageUrl(article.imageUrl)}
                   />
                 </div>
                 <figcaption className="mt-2 font-mono text-xs text-muted-foreground">
