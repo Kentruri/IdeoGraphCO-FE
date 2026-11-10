@@ -17,7 +17,7 @@ import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
 import { CountUp } from "@/components/motion/CountUp";
 import { ArticleDetailSkeleton } from "@/components/skeletons/ArticleDetailSkeleton";
 import { Button } from "@/components/ui/button";
-import { formatDate, formatProbability } from "@/lib/format";
+import { endAtLastSentence, formatDate, formatProbability } from "@/lib/format";
 import { getSourceCategoryMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { useGetArticleBySlugQuery } from "@/store/services/articles.api";
@@ -119,21 +119,43 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
 
             {/* Lectura: la noticia original, la que se clasificó (snippet
                 del primer medio y enlace al original, CONTRACT.md regla 1).
-                La versión triangulada, si existe, va después del mapa. */}
+                El aviso va primero para que el fragmento no se lea como una
+                nota incompleta; el cuerpo completo nunca se publica (tesis,
+                sección 12.1). La versión triangulada, si existe, va después
+                del mapa. */}
             {lead && (
               <div className="max-w-prose space-y-6">
-                <p className={cn("font-serif text-lg leading-8", DROP_CAP)}>
-                  {lead.snippet}
-                </p>
-                <Button asChild variant="outline">
-                  <a href={lead.url} target="_blank" rel="noopener noreferrer">
-                    Leer en {lead.name}
-                    <ArrowUpRight aria-hidden />
-                    <span className="sr-only">
-                      (se abre en una pestaña nueva)
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-y border-border py-3">
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    Noticia publicada por{" "}
+                    <span className="font-medium text-foreground">
+                      {lead.name}
                     </span>
-                  </a>
-                </Button>
+                    . Aquí se muestra su comienzo.
+                  </p>
+                  <Button asChild size="sm">
+                    <a href={lead.url} target="_blank" rel="noopener noreferrer">
+                      Leer la nota completa
+                      <ArrowUpRight aria-hidden />
+                      <span className="sr-only">
+                        en {lead.name} (se abre en una pestaña nueva)
+                      </span>
+                    </a>
+                  </Button>
+                </div>
+                <p className={cn("font-serif text-lg leading-8", DROP_CAP)}>
+                  {endAtLastSentence(lead.snippet)}
+                </p>
+                <a
+                  href={lead.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm font-medium underline underline-offset-4 hover:text-muted-foreground"
+                >
+                  Seguir leyendo en {lead.name}
+                  <ArrowUpRight aria-hidden className="size-4" />
+                  <span className="sr-only">(se abre en una pestaña nueva)</span>
+                </a>
               </div>
             )}
 
