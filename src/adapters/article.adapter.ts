@@ -4,6 +4,8 @@ import type {
   ArticleIdeology,
   ArticleSource,
   ClassificationDTO,
+  ClassificationExplanation,
+  ExplanationDTO,
   Paginated,
   PaginatedStoriesDTO,
   SourceArticleDTO,
@@ -87,10 +89,21 @@ function adaptSynthesized(dto: SynthesizedDTO): SynthesizedArticle {
   };
 }
 
+function adaptExplanation(dto: ExplanationDTO): ClassificationExplanation {
+  return {
+    text: dto.text,
+    classes: dto.classes,
+    model: dto.model,
+    generatedAt: dto.generated_at,
+    disclaimer: dto.disclaimer,
+  };
+}
+
 export function adaptArticleDetail(dto: StoryDetailDTO): ArticleDetail {
   return {
     ...adaptArticle(dto),
     keywords: dto.keywords,
+    explanation: dto.explanation ? adaptExplanation(dto.explanation) : null,
     synthesized: dto.synthesized ? adaptSynthesized(dto.synthesized) : null,
     // El contrato no fija el orden de `sources`; el representativo es el
     // primero en reportar, así que el orden cronológico lo deja al frente.

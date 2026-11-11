@@ -116,9 +116,30 @@ export interface SynthesizedDTO {
   classification?: ClassificationDTO | null;
 }
 
+/**
+ * Por qué la noticia cae en su clase predicha, y en la segunda si llega al
+ * 20 % (`ExplanationDTO`). La redacta un LLM a partir del texto y del codebook;
+ * no es el razonamiento del clasificador, por eso trae su `disclaimer`.
+ */
+export interface ExplanationDTO {
+  /** Párrafo de 3 o 4 frases. */
+  text: string;
+  /** Clases que explica: la predicha y, si pesa, la segunda. */
+  classes: IdeologyClass[];
+  /** LLM que la redactó. */
+  model: string;
+  generated_at: string;
+  disclaimer: string;
+}
+
 /** Respuesta de `GET /api/v1/stories/{slug}` (`StoryDetailDTO`). */
 export interface StoryDetailDTO extends StoryListItemDTO {
   keywords: string[];
+  /**
+   * Explicación de `classification`; null si no se ha generado o si la
+   * noticia se reclasificó después. Ausente en un BE anterior al campo.
+   */
+  explanation?: ExplanationDTO | null;
   synthesized: SynthesizedDTO | null;
   /** Siempre ≥1, cada fuente con su propia clasificación. */
   sources: SourceArticleDTO[];
@@ -199,8 +220,22 @@ export interface SynthesizedArticle {
   ideology: ArticleIdeology | null;
 }
 
+/**
+ * Explicación de la clase predicha, redactada por IA a partir del texto y del
+ * codebook. Se muestra bajo la clase y siempre con su `disclaimer`.
+ */
+export interface ClassificationExplanation {
+  text: string;
+  classes: IdeologyClass[];
+  model: string;
+  generatedAt: string;
+  disclaimer: string;
+}
+
 export interface ArticleDetail extends Article {
   keywords: string[];
+  /** null mientras no exista para la clasificación vigente. */
+  explanation: ClassificationExplanation | null;
   synthesized: SynthesizedArticle | null;
   /** De la primera fuente en reportar (el representativo) a la última. */
   sources: ArticleSource[];

@@ -12,6 +12,7 @@ import { ErrorState } from "@/components/feedback/States";
 import { IdeologyAxes } from "@/components/ideology/IdeologyAxes";
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyDistribution } from "@/components/ideology/IdeologyDistribution";
+import { IdeologyExplanation } from "@/components/ideology/IdeologyExplanation";
 import { IdeologyHeatmap } from "@/components/ideology/IdeologyHeatmap";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
 import { CountUp } from "@/components/motion/CountUp";
@@ -264,6 +265,15 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
                   {IDEOLOGY_META[article.ideology.predicted].description}
                 </p>
               </div>
+
+              {/* Explicación redactada por IA desde el texto y el codebook,
+                  con su rótulo: no es el razonamiento del clasificador. */}
+              {article.explanation && (
+                <IdeologyExplanation
+                  explanation={article.explanation}
+                  className="mt-5"
+                />
+              )}
 
               <div className="mt-6 flex items-baseline gap-3 border-t border-border pt-5">
                 {/* Es la probabilidad (softmax) que el modelo asigna a la clase
