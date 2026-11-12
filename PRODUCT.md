@@ -22,7 +22,7 @@ predicha** y la **distribución de probabilidad softmax sobre 8 clases**.
 ## Verdad del dominio (no negociable)
 
 - **8 clases ideológicas** en **4 pares opuestos** (ejes teóricos del anteproyecto):
-  personalismo↔institucionalismo, populismo↔doctrinarismo,
+  populismo↔institucionalismo, personalismo↔doctrinarismo,
   soberanismo↔globalismo, conservadurismo↔progresismo.
 - La **paleta categórica de 8 colores** está validada (CVD + contraste) en ambos
   temas y su orden de despliegue (`IDEOLOGY_DISPLAY_ORDER`) no se reordena.
@@ -32,8 +32,9 @@ predicha** y la **distribución de probabilidad softmax sobre 8 clases**.
   veracidad** de los hechos. La interfaz nunca debe insinuar juicio de verdad.
 - **Neutralidad**: el producto no puede favorecer visualmente ninguna clase;
   por eso el cromo no adopta ningún color de acento de marca.
-- Los datos actuales son de **demostración** (la API real no existe aún); el
-  footer lo declara.
+- Las noticias vienen de **IdeoGraphCO-BE** (contrato v2): publicaciones reales
+  de medios colombianos, de las que el público ve título, snippet y enlace al
+  original. Cada clasificación declara la versión del modelo que la emitió.
 
 ## Superficies
 

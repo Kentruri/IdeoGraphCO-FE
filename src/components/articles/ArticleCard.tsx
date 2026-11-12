@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { NewsImage } from "@/components/articles/NewsImage";
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
 import { formatPublishedAt } from "@/lib/format";
@@ -16,6 +16,12 @@ interface ArticleCardProps {
  * color pertenece a la medición, no a la foto).
  */
 export function ArticleCard({ article }: ArticleCardProps) {
+  const placeholder = (
+    <div className="flex h-full items-center justify-center px-4 text-center font-display text-xl font-bold uppercase tracking-tight text-muted-foreground/50">
+      {article.source.name}
+    </div>
+  );
+
   return (
     <article className="group relative flex h-full flex-col focus-within:ring-2 focus-within:ring-ring/60 focus-within:ring-offset-4 focus-within:ring-offset-background motion-safe:transition-[transform,box-shadow] motion-safe:duration-200 motion-safe:ease-out-expo motion-safe:hover:shadow-lg motion-safe:hover:shadow-foreground/15 motion-safe:hover:[transform:perspective(900px)_rotateX(1.6deg)_translateY(-5px)]">
       <Link
@@ -30,17 +36,16 @@ export function ArticleCard({ article }: ArticleCardProps) {
 
         <div className="relative mt-3 aspect-video w-full overflow-hidden bg-muted">
           {article.imageUrl ? (
-            <Image
+            <NewsImage
               src={article.imageUrl}
               alt=""
               fill
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               className="object-cover grayscale motion-safe:transition-[filter] motion-safe:duration-250 motion-safe:ease-out-expo group-hover:grayscale-0 dark:opacity-90"
+              fallback={placeholder}
             />
           ) : (
-            <div className="flex h-full items-center justify-center px-4 text-center font-display text-xl font-bold uppercase tracking-tight text-muted-foreground/50">
-              {article.source.name}
-            </div>
+            placeholder
           )}
         </div>
 
@@ -50,15 +55,23 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <time dateTime={article.publishedAt}>
               {formatPublishedAt(article.publishedAt)}
             </time>
+            {article.hasSynthesized && (
+              <span className="text-foreground">
+                {" "}
+                · triangulada, {article.sourcesCount} medios
+              </span>
+            )}
           </p>
 
           <h2 className="font-display text-lg font-bold leading-snug tracking-tight">
             {article.title}
           </h2>
 
-          <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
-            {article.subtitle}
-          </p>
+          {article.subtitle && (
+            <p className="line-clamp-2 text-sm leading-6 text-muted-foreground">
+              {article.subtitle}
+            </p>
+          )}
 
           <div className="mt-auto pt-3">
             <IdeologyBadge

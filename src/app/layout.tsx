@@ -39,7 +39,7 @@ const splineMono = Spline_Sans_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} — Ideología en noticias políticas colombianas`,
+    default: `${SITE_NAME}, ideología en noticias políticas colombianas`,
     template: `%s · ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,

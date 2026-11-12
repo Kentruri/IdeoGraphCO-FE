@@ -8,8 +8,8 @@ import { OPPOSITE_PAIRS, type IdeologyClass } from "@/types/ideology";
 
 /** Orden de las puntas de la rosa: cada clase enfrenta a su opuesta (i ↔ i+4). */
 export const ROSE_ORDER: readonly IdeologyClass[] = [
-  OPPOSITE_PAIRS[0][0], // personalismo (N)
-  OPPOSITE_PAIRS[1][0], // populismo (NE)
+  OPPOSITE_PAIRS[0][0], // populismo (N)
+  OPPOSITE_PAIRS[1][0], // personalismo (NE)
   OPPOSITE_PAIRS[2][0], // soberanismo (E)
   OPPOSITE_PAIRS[3][0], // conservadurismo (SE)
   OPPOSITE_PAIRS[0][1], // institucionalismo (S)

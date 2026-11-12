@@ -1,22 +1,32 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronRight } from "lucide-react";
+import { useState } from "react";
 
+import { NewsImage } from "@/components/articles/NewsImage";
+import { SourceItem } from "@/components/articles/SourceItem";
+import { TriangulatedStory } from "@/components/articles/TriangulatedStory";
 import { ErrorState } from "@/components/feedback/States";
 import { IdeologyAxes } from "@/components/ideology/IdeologyAxes";
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyDistribution } from "@/components/ideology/IdeologyDistribution";
+import { IdeologyExplanation } from "@/components/ideology/IdeologyExplanation";
+import { IdeologyHeatmap } from "@/components/ideology/IdeologyHeatmap";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
 import { CountUp } from "@/components/motion/CountUp";
 import { ArticleDetailSkeleton } from "@/components/skeletons/ArticleDetailSkeleton";
-import { formatConfidence, formatDate } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { endAtLastSentence, formatDate, formatProbability } from "@/lib/format";
 import { getSourceCategoryMeta } from "@/lib/site";
 import { cn } from "@/lib/utils";
 import { useGetArticleBySlugQuery } from "@/store/services/articles.api";
 import { IDEOLOGY_META } from "@/types/ideology";
+
+/** Capitular editorial del primer párrafo de la lectura. */
+const DROP_CAP =
+  "first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-6xl first-letter:font-extrabold first-letter:leading-[0.85]";
 
 interface ArticleDetailPageProps {
   slug: string;
@@ -25,10 +35,15 @@ interface ArticleDetailPageProps {
 export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
   const { data: article, isLoading, isError, error, refetch } =
     useGetArticleBySlugQuery(slug);
+  // URL de la foto que no cargó por ninguna vía: su figura se oculta entera.
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
 
   if (isError && "status" in error && error.status === 404) {
     notFound();
   }
+
+  /** El representativo: primera fuente en reportar (el adapter las ordena). */
+  const lead = article?.sources[0];
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 sm:px-6">
@@ -73,48 +88,146 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
                 {article.title}
               </h1>
 
-              <p className="font-serif text-xl italic leading-8 text-pretty text-muted-foreground">
-                {article.subtitle}
-              </p>
+              {article.subtitle && (
+                <p className="font-serif text-xl italic leading-8 text-pretty text-muted-foreground">
+                  {article.subtitle}
+                </p>
+              )}
 
               {article.author && (
                 <p className="text-sm font-medium">Por {article.author}</p>
               )}
             </header>
 
-            {article.imageUrl && (
+            {article.imageUrl && article.imageUrl !== failedImageUrl && (
               <figure className="my-10">
                 <div className="relative aspect-video w-full border border-border bg-muted">
-                  <Image
+                  <NewsImage
                     src={article.imageUrl}
                     alt=""
                     fill
                     priority
                     sizes="(max-width: 1024px) 100vw, 66vw"
                     className="object-cover dark:opacity-90"
+                    onFail={() => setFailedImageUrl(article.imageUrl)}
                   />
                 </div>
                 <figcaption className="mt-2 font-mono text-xs text-muted-foreground">
-                  Imagen de referencia (datos de demostración).
+                  Imagen: {article.source.name}.
                 </figcaption>
               </figure>
             )}
 
-            {/* Lectura larga en serif con capitular editorial. */}
-            <div className="max-w-prose space-y-6">
-              {article.body.map((paragraph, index) => (
-                <p
-                  key={index}
-                  className={cn(
-                    "font-serif text-lg leading-8",
-                    index === 0 &&
-                      "first-letter:float-left first-letter:mr-2 first-letter:font-display first-letter:text-6xl first-letter:font-extrabold first-letter:leading-[0.85]"
-                  )}
-                >
-                  {paragraph}
+            {/* Lectura: la noticia original, la que se clasificó (snippet
+                del primer medio y enlace al original, CONTRACT.md regla 1).
+                El aviso va primero para que el fragmento no se lea como una
+                nota incompleta; el cuerpo completo nunca se publica (tesis,
+                sección 12.1). La versión triangulada, si existe, va después
+                del mapa. */}
+            {lead && (
+              <div className="max-w-prose space-y-6">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 border-y border-border py-3">
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    Noticia publicada por{" "}
+                    <span className="font-medium text-foreground">
+                      {lead.name}
+                    </span>
+                    . Aquí se muestra su comienzo.
+                  </p>
+                  <Button asChild size="sm">
+                    <a href={lead.url} target="_blank" rel="noopener noreferrer">
+                      Leer la nota completa
+                      <ArrowUpRight aria-hidden />
+                      <span className="sr-only">
+                        en {lead.name} (se abre en una pestaña nueva)
+                      </span>
+                    </a>
+                  </Button>
+                </div>
+                <p className={cn("font-serif text-lg leading-8", DROP_CAP)}>
+                  {endAtLastSentence(lead.snippet)}
                 </p>
-              ))}
-            </div>
+                <a
+                  href={lead.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm font-medium underline underline-offset-4 hover:text-muted-foreground"
+                >
+                  Seguir leyendo en {lead.name}
+                  <ArrowUpRight aria-hidden className="size-4" />
+                  <span className="sr-only">(se abre en una pestaña nueva)</span>
+                </a>
+              </div>
+            )}
+
+            {/* Mapa de calor 3D de la noticia: se recorre girándolo. */}
+            <section
+              id="mapa-de-calor"
+              aria-labelledby="mapa-de-calor-titulo"
+              className="rule-double mt-16 scroll-mt-header pt-6"
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <h2
+                  id="mapa-de-calor-titulo"
+                  className="font-display text-2xl font-bold tracking-tight"
+                >
+                  Mapa de calor ideológico
+                </h2>
+                <p className="font-mono text-[11px] text-muted-foreground">
+                  modelo {article.ideology.modelVersion}
+                </p>
+              </div>
+              <p className="mt-1.5 max-w-prose text-sm leading-6 text-muted-foreground">
+                Cada punta es una de las 8 clases, frente a su opuesta. Su
+                largo y su color crecen con la probabilidad que el modelo le da
+                a la noticia original de {lead?.name ?? article.source.name}.
+              </p>
+              <IdeologyHeatmap
+                className="mt-5"
+                probabilities={article.ideology.probabilities}
+                focus={article.ideology.predicted}
+                label="Clases del mapa de calor"
+              />
+            </section>
+
+            {article.synthesized ? (
+              <TriangulatedStory
+                synthesized={article.synthesized}
+                sources={article.sources}
+              />
+            ) : (
+              article.sources.length > 1 && (
+                <section
+                  aria-labelledby="cobertura"
+                  className="rule-double mt-16 pt-6"
+                >
+                  <h2
+                    id="cobertura"
+                    className="font-display text-2xl font-bold tracking-tight"
+                  >
+                    Cobertura
+                  </h2>
+                  <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                    <span className="tabular-nums">
+                      {article.sources.length}
+                    </span>{" "}
+                    medios cubren esta historia, cada uno con su propia
+                    clasificación.
+                  </p>
+                  <ol className="mt-4 divide-y divide-border">
+                    {article.sources.map((source, index) => (
+                      <SourceItem
+                        key={source.id}
+                        source={source}
+                        // El snippet del primer medio ya es la lectura principal.
+                        showSnippet={index > 0}
+                        note={index === 0 ? "noticia clasificada" : undefined}
+                      />
+                    ))}
+                  </ol>
+                </section>
+              )
+            )}
 
             {article.keywords.length > 0 && (
               <ul
@@ -153,15 +266,28 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
                 </p>
               </div>
 
+              {/* Explicación redactada por IA desde el texto y el codebook,
+                  con su rótulo: no es el razonamiento del clasificador. */}
+              {article.explanation && (
+                <IdeologyExplanation
+                  explanation={article.explanation}
+                  className="mt-5"
+                />
+              )}
+
               <div className="mt-6 flex items-baseline gap-3 border-t border-border pt-5">
-                <p className="font-mono text-4xl font-semibold tabular-nums">
+                {/* Es la probabilidad (softmax) que el modelo asigna a la clase
+                    predicha, sin calibrar: no se presenta como «confianza»
+                    ni como probabilidad de acierto. Con un decimal, igual que
+                    la lista, para que no se lea como certeza. */}
+                <p className="shrink-0 whitespace-nowrap font-mono text-4xl font-semibold tabular-nums">
                   <CountUp
                     value={article.ideology.confidence}
-                    format={formatConfidence}
+                    format={formatProbability}
                   />
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  de confianza del modelo
+                  de probabilidad según el modelo
                 </p>
               </div>
 
@@ -185,9 +311,11 @@ export function ArticleDetailPage({ slug }: ArticleDetailPageProps) {
 
               <p className="mt-7 border-t border-border pt-4 font-mono text-[11px] leading-5 text-muted-foreground">
                 Clasificación generada automáticamente (modelo{" "}
-                {article.ideology.modelVersion}). La distribución suma 1 y
-                describe el encuadre dominante del texto, no la veracidad de
-                los hechos.
+                {article.ideology.modelVersion})
+                {article.sourcesCount > 1 &&
+                  ` sobre el artículo de ${article.source.name}, el primero en reportar`}
+                . La distribución suma 1 y describe el encuadre dominante del
+                texto, no la veracidad de los hechos.
               </p>
             </section>
           </aside>

@@ -145,6 +145,19 @@
   --ideology-institucionalismo: #008300;
   --ideology-progresismo: #4a3aa7;
   --ideology-personalismo: #e34948;
+
+  /* Rampa del mapa de calor (IdeologyHeatmap): codifica probabilidad, no
+     clase. Frío en el centro (0 %), cálido en las crestas (100 %). Nunca va
+     sola: el radio y la cifra escrita dicen lo mismo. Extremos profundos
+     (azul intenso, rojo oscuro) y un paso tibio claro en el medio, sin
+     amarillo ni celeste pálidos: así no se ve pastel. */
+  --heat-0: oklch(0.46 0.2 264);
+  --heat-1: oklch(0.64 0.15 245);
+  --heat-2: oklch(0.8 0.12 72);
+  --heat-3: oklch(0.64 0.2 40);
+  --heat-4: oklch(0.47 0.19 27);
+  /* Isotermas: los anillos de la retícula, en papel, dentro del calor. */
+  --heat-iso: oklch(0.99 0.004 85 / 0.6);
 }
 
 .dark {
@@ -157,6 +170,13 @@
   --ideology-institucionalismo: #008300;
   --ideology-progresismo: #9085e9;
   --ideology-personalismo: #e66767;
+
+  --heat-0: oklch(0.5 0.2 264);
+  --heat-1: oklch(0.66 0.15 245);
+  --heat-2: oklch(0.8 0.12 72);
+  --heat-3: oklch(0.66 0.2 40);
+  --heat-4: oklch(0.55 0.2 27);
+  --heat-iso: oklch(0.146 0.005 80 / 0.5);
 
   /* Tema oscuro "cuarto de mapas": grafito cálido, nunca negro puro.
      La luminancia del fondo conserva la superficie de validación. */
@@ -259,6 +279,19 @@
         transform: scaleX(0);
       }
     }
+  }
+
+  /* Rampa del mapa de calor en horizontal (leyenda). Paradas en fracción
+     del radio, que crece con la raíz de la probabilidad. */
+  .heat-ramp {
+    background-image: linear-gradient(
+      to right,
+      var(--heat-0) 0%,
+      var(--heat-1) 30%,
+      var(--heat-2) 50%,
+      var(--heat-3) 71%,
+      var(--heat-4) 100%
+    );
   }
 
   /* Skeleton editorial: barrido de luz sobre la superficie muted. */

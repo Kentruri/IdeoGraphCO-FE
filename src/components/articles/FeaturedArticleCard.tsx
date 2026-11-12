@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { NewsImage } from "@/components/articles/NewsImage";
 import { IdeologyBadge } from "@/components/ideology/IdeologyBadge";
 import { IdeologyStrip } from "@/components/ideology/IdeologyStrip";
 import { formatPublishedAt } from "@/lib/format";
@@ -14,6 +14,11 @@ interface FeaturedArticleCardProps {
 /** Apertura de portada: foto a 7 columnas y titular editorial a 5. */
 export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
   const categoryMeta = getSourceCategoryMeta(article.source.category);
+  const placeholder = (
+    <div className="flex h-full items-center justify-center px-6 text-center font-display text-3xl font-bold uppercase tracking-tight text-muted-foreground/50">
+      {article.source.name}
+    </div>
+  );
 
   return (
     <article className="group relative border-b border-border pb-16 focus-within:ring-2 focus-within:ring-ring/60 focus-within:ring-offset-4 focus-within:ring-offset-background">
@@ -24,18 +29,17 @@ export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
       >
         <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted md:col-span-7">
           {article.imageUrl ? (
-            <Image
+            <NewsImage
               src={article.imageUrl}
               alt=""
               fill
               priority
               sizes="(max-width: 768px) 100vw, 58vw"
               className="object-cover grayscale motion-safe:transition-[filter,transform] motion-safe:duration-250 motion-safe:ease-out-expo group-hover:grayscale-0 motion-safe:group-hover:scale-[1.015] dark:opacity-90"
+              fallback={placeholder}
             />
           ) : (
-            <div className="flex h-full items-center justify-center px-6 text-center font-display text-3xl font-bold uppercase tracking-tight text-muted-foreground/50">
-              {article.source.name}
-            </div>
+            placeholder
           )}
         </div>
 
@@ -46,15 +50,23 @@ export function FeaturedArticleCard({ article }: FeaturedArticleCardProps) {
             <time dateTime={article.publishedAt}>
               {formatPublishedAt(article.publishedAt)}
             </time>
+            {article.hasSynthesized && (
+              <span className="text-foreground">
+                {" "}
+                · triangulada, {article.sourcesCount} medios
+              </span>
+            )}
           </p>
 
           <h2 className="font-display text-3xl font-extrabold leading-[1.02] tracking-tight text-balance md:text-4xl lg:text-[2.75rem]">
             {article.title}
           </h2>
 
-          <p className="text-base leading-7 text-pretty text-muted-foreground">
-            {article.subtitle}
-          </p>
+          {article.subtitle && (
+            <p className="text-base leading-7 text-pretty text-muted-foreground">
+              {article.subtitle}
+            </p>
+          )}
 
           <div className="mt-auto space-y-3 pt-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
