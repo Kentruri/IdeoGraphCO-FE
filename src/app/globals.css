@@ -29,6 +29,14 @@
   --animate-shimmer: shimmer 1.8s linear infinite;
   /* Titular "recién impreso": la tinta entra de izquierda a derecha. */
   --animate-ink-print: ink-print 0.7s var(--ease-out-expo) both;
+  /* Cursor de la explicación en vivo mientras la IA escribe. */
+  --animate-caret-blink: caret-blink 1.05s steps(1, end) infinite;
+
+  @keyframes caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
 
   @keyframes ink-print {
     from {

@@ -6,6 +6,9 @@ import type {
   ArticleIdeology,
   ClassifyRequestDTO,
   ClassifyResponseDTO,
+  ExplanationReviewCreatedDTO,
+  ExplanationReviewRequestDTO,
+  HealthDTO,
   NotPoliticalCategory,
   NotPoliticalErrorDTO,
 } from "@/types/article";
@@ -51,10 +54,43 @@ export function toClassifyFailure(error: unknown): ClassifyFailure {
   return { kind: "unavailable" };
 }
 
+/** Por qué no se guardó la ficha de revisión. */
+export type ReviewFailure =
+  | { kind: "rejected"; message: string }
+  | { kind: "disabled" }
+  | { kind: "unavailable" };
+
+/** Primer mensaje de un 422 de FastAPI (`detail` es una lista de errores). */
+function firstValidationMessage(data: unknown): string {
+  const detail = (data as { detail?: unknown } | null)?.detail;
+  if (Array.isArray(detail) && detail.length > 0) {
+    const message = (detail[0] as { msg?: unknown }).msg;
+    if (typeof message === "string") return message;
+  }
+  return "La ficha no cumple el formato que espera el servidor.";
+}
+
 export const classifierApi = createApi({
   reducerPath: "classifierApi",
   baseQuery: fetchBaseQuery({ baseUrl: CLASSIFIER_API_URL }),
   endpoints: (builder) => ({
+    /** Qué ofrece el BE: con `desk_explanations`, la mesa muestra la explicación en vivo. */
+    getHealth: builder.query<HealthDTO, void>({
+      query: () => "health",
+    }),
+    /** Guarda la ficha de revisión de una explicación en vivo (`POST /explanation-reviews`). */
+    saveExplanationReview: builder.mutation<
+      ExplanationReviewCreatedDTO,
+      ExplanationReviewRequestDTO
+    >({
+      query: (body) => ({ url: "explanation-reviews", method: "POST", body }),
+      transformErrorResponse: (response: FetchBaseQueryError): ReviewFailure =>
+        response.status === 422
+          ? { kind: "rejected", message: firstValidationMessage(response.data) }
+          : response.status === 503
+            ? { kind: "disabled" }
+            : { kind: "unavailable" },
+    }),
     classifyText: builder.mutation<ArticleIdeology, ClassifyRequestDTO>({
       query: (body) => ({ url: "classify", method: "POST", body }),
       transformResponse: (response: ClassifyResponseDTO) =>
@@ -72,4 +108,8 @@ export const classifierApi = createApi({
   }),
 });
 
-export const { useClassifyTextMutation } = classifierApi;
+export const {
+  useClassifyTextMutation,
+  useGetHealthQuery,
+  useSaveExplanationReviewMutation,
+} = classifierApi;

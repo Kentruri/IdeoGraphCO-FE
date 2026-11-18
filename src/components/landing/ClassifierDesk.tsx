@@ -6,6 +6,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import { IdeologyDistribution } from "@/components/ideology/IdeologyDistribution";
 import { IdeologyHeatmap } from "@/components/ideology/IdeologyHeatmap";
+import { LiveExplanation } from "@/components/ideology/LiveExplanation";
 import { SectionOpen } from "@/components/landing/SectionOpen";
 import { CountUp } from "@/components/motion/CountUp";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,7 @@ import {
   CLASSIFIER_API_URL,
   toClassifyFailure,
   useClassifyTextMutation,
+  useGetHealthQuery,
 } from "@/store/services/classifier.api";
 import type { ArticleIdeology, NotPoliticalCategory } from "@/types/article";
 import {
@@ -49,7 +51,12 @@ interface DeskVerdict {
   distribution: Distribution;
   /** Quién lo emitió: el modelo servido por el BE o el léxico del navegador. */
   origin:
-    | { kind: "model"; modelVersion: string }
+    | {
+        kind: "model";
+        modelVersion: string;
+        /** El titular y el texto que se clasificaron, para explicarlos. */
+        request: { title: string; text: string };
+      }
     | { kind: "demo"; signals: DemoSignal[]; hasSignals: boolean };
 }
 
@@ -62,12 +69,15 @@ type DeskState =
   | { phase: "rejected"; category: NotPoliticalCategory; reason: string }
   | { phase: "error" };
 
-function fromModel(ideology: ArticleIdeology): DeskVerdict {
+function fromModel(
+  ideology: ArticleIdeology,
+  request: { title: string; text: string }
+): DeskVerdict {
   return {
     predicted: ideology.predicted,
     confidence: ideology.confidence,
     distribution: ideology.probabilities,
-    origin: { kind: "model", modelVersion: ideology.modelVersion },
+    origin: { kind: "model", modelVersion: ideology.modelVersion, request },
   };
 }
 
@@ -133,14 +143,12 @@ export function ClassifierDesk({ standalone = false }: { standalone?: boolean })
 
     setState({ phase: "composing" });
     const started = Date.now();
+    const sent = { title: title.trim(), text: text.trim() };
     try {
-      const result = await classifyText({
-        title: title.trim(),
-        text: text.trim(),
-      }).unwrap();
+      const result = await classifyText(sent).unwrap();
       if (request !== lastRequest.current) return;
       // Si el modelo responde antes del compás, se espera lo que falta.
-      stampAfter(fromModel(result), COMPOSE_MS - (Date.now() - started));
+      stampAfter(fromModel(result, sent), COMPOSE_MS - (Date.now() - started));
     } catch (error) {
       if (request !== lastRequest.current) return;
       const failure = toClassifyFailure(error);
@@ -351,6 +359,10 @@ function VerdictSheet({
 }) {
   const meta = IDEOLOGY_META[verdict.predicted];
   const { origin } = verdict;
+  // La explicación en vivo solo existe donde el BE la tiene activa.
+  const { data: health } = useGetHealthQuery(undefined, {
+    skip: origin.kind !== "model",
+  });
 
   return (
     <motion.div
@@ -410,6 +422,15 @@ function VerdictSheet({
           ? `Clasificado por el modelo del trabajo de grado (${origin.modelVersion}).`
           : "Demostración con léxico ilustrativo en el navegador; no es el modelo del trabajo de grado."}
       </p>
+
+      {origin.kind === "model" && health?.desk_explanations && (
+        <LiveExplanation
+          className="mt-6"
+          request={origin.request}
+          predicted={verdict.predicted}
+          modelVersion={origin.modelVersion}
+        />
+      )}
     </motion.div>
   );
 }
