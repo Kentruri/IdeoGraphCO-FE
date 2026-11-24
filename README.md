@@ -16,6 +16,7 @@ sobre las 8 clases** (salida softmax del clasificador).
 
 - **Next.js 15** (App Router, TypeScript, Turbopack)
 - **Tailwind CSS v4 + shadcn/ui** — un solo sistema de estilos
+- **Zod** para validar en el cliente lo que redacta la IA
 - **Redux Toolkit + RTK Query** — estado global y capa de datos (sin Context propio)
 - **next/font** — Inter (UI), Lora (titulares), Geist Mono (código)
 
@@ -60,11 +61,13 @@ src/
 │   └── ui/                    # shadcn/ui (generado)
 ├── store/                     # Redux Toolkit
 │   ├── services/articles.api.ts    # RTK Query (getArticles, getArticleBySlug → /stories del BE)
-│   ├── services/classifier.api.ts  # RTK Query (classifyText → POST /classify del BE)
+│   ├── services/classifier.api.ts  # RTK Query (classifyText, getHealth, saveExplanationReview)
 │   └── slices/preferences.slice.ts # Tema claro/oscuro
+├── hooks/useExplanationStream.ts  # Explicación en vivo: POST /explain leído como SSE
+├── schemas/explanation.ts     # Zod: eventos del stream, explicación y ficha de revisión
 ├── adapters/                  # DTO (snake_case) → modelo de UI (camelCase)
 ├── types/                     # ideology.ts (8 clases), article.ts (DTOs del contrato v2 + modelos)
-└── lib/                       # site.ts (metadatos), format.ts (fechas/porcentajes)
+└── lib/                       # site.ts (metadatos), format.ts (fechas/porcentajes), sse.ts (lector SSE)
 ```
 
 ## Flujo de datos
@@ -115,6 +118,36 @@ Sin la variable usa el léxico de demostración del navegador, y cada veredicto
 declara cuál de los dos lo emitió. Va aparte de `NEXT_PUBLIC_API_URL` porque
 depende del servicio de inferencia; normalmente las dos apuntan al mismo
 backend.
+
+### Explicación en vivo y ficha de revisión
+
+Si el BE la tiene activa (`GET /health` responde `desk_explanations: true`,
+ver `DESK_EXPLANATION_MODE` en su README), bajo un veredicto del modelo la
+mesa ofrece "Explicar esta clasificación". El BE vuelve a clasificar el texto
+y transmite la explicación por Server-Sent Events mientras la IA la escribe
+(`POST /api/v1/explain`; contrato en el `CONTRACT.md` del BE).
+
+- **Lectura del stream** (`src/hooks/useExplanationStream.ts`): `EventSource`
+  solo hace GET, así que el stream se lee con `fetch` y `src/lib/sse.ts`. El
+  párrafo crece con cada `delta`; un `retry` lo borra y dice qué regla rompió
+  el borrador; "Detener" (o salir de la página) aborta la petición y el BE
+  mata el proceso de la IA.
+- **Validación en el cliente** (`src/schemas/explanation.ts`, Zod): cada evento
+  se valida al llegar. La explicación final solo se muestra si trae 1 o 2 de
+  las 8 clases, la primera es la del veredicto, califica el apoyo de cada una
+  (alto, medio o bajo), tiene entre 40 y 125 palabras y no usa la palabra
+  «confianza» ni porcentajes. Un evento que no cumple corta el stream. La
+  explicación guardada del detalle de cada noticia pasa por el mismo esquema
+  en el adapter: si no cumple, no se muestra.
+- **Ficha de revisión** (`ExplanationReviewForm`): cuando la explicación es
+  válida, una ficha llega prellenada con su salida estructurada (el apoyo que
+  la IA le da a cada clase y el párrafo, editables). Quien revisa dice si se
+  ajusta al texto y si el lenguaje es neutral y la guarda
+  (`POST /api/v1/explanation-reviews`). Zod la valida antes de enviarla, con
+  el error junto a cada campo, y el BE la vuelve a validar.
+
+Como la explicación del detalle, se muestra siempre con su rótulo y nunca como
+el razonamiento del clasificador.
 
 ## Las 8 clases ideológicas
 

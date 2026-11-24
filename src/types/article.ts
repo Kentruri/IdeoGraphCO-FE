@@ -128,8 +128,51 @@ export interface ExplanationDTO {
   classes: IdeologyClass[];
   /** LLM que la redactó. */
   model: string;
+  /** Versión de los prompts; null en las escritas antes de guardarla. */
+  prompt_version?: string | null;
   generated_at: string;
   disclaimer: string;
+}
+
+/** Respuesta de `GET /api/v1/health`. */
+export interface HealthDTO {
+  status: string;
+  version: string;
+  /** La mesa puede ofrecer la explicación en vivo (`POST /explain`). Ausente en un BE anterior. */
+  desk_explanations?: boolean;
+}
+
+/**
+ * Cuerpo de `POST /api/v1/explanation-reviews`: la ficha de revisión de una
+ * explicación en vivo. Los eventos de `POST /api/v1/explain` y sus tipos están
+ * en `src/schemas/explanation.ts`, porque se validan con Zod al llegar.
+ */
+export interface ExplanationReviewRequestDTO {
+  title: string;
+  text: string;
+  classification: ClassificationDTO;
+  /** El evento `explanation` tal como llegó, sin el disclaimer. */
+  explanation: {
+    text: string;
+    classes: IdeologyClass[];
+    support: Partial<Record<IdeologyClass, "alto" | "medio" | "bajo">>;
+    model: string;
+    prompt_version: string;
+  };
+  review: {
+    support: Partial<Record<IdeologyClass, "alto" | "medio" | "bajo">>;
+    /** null si quedó igual al párrafo de la IA. */
+    revised_text: string | null;
+    fits_text: "si" | "en_parte" | "no";
+    neutral: boolean;
+    notes: string | null;
+  };
+}
+
+/** 201 de `POST /api/v1/explanation-reviews`. */
+export interface ExplanationReviewCreatedDTO {
+  id: string;
+  created_at: string;
 }
 
 /** Respuesta de `GET /api/v1/stories/{slug}` (`StoryDetailDTO`). */
@@ -228,6 +271,8 @@ export interface ClassificationExplanation {
   text: string;
   classes: IdeologyClass[];
   model: string;
+  /** Versión de los prompts con que se escribió (null si es anterior). */
+  promptVersion: string | null;
   generatedAt: string;
   disclaimer: string;
 }

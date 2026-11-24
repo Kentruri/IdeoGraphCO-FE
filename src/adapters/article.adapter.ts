@@ -1,3 +1,4 @@
+import { storedExplanationSchema } from "@/schemas/explanation";
 import type {
   Article,
   ArticleDetail,
@@ -89,13 +90,28 @@ function adaptSynthesized(dto: SynthesizedDTO): SynthesizedArticle {
   };
 }
 
-function adaptExplanation(dto: ExplanationDTO): ClassificationExplanation {
+/**
+ * La explicación la redacta una IA: antes de mostrarla se valida con Zod
+ * (`src/schemas/explanation.ts`). Si no cumple el contrato, la noticia se
+ * muestra sin explicación, como cuando el BE manda null.
+ */
+function adaptExplanation(dto: ExplanationDTO): ClassificationExplanation | null {
+  const parsed = storedExplanationSchema.safeParse(dto);
+  if (!parsed.success) {
+    console.warn(
+      "Explicación descartada: no pasó la validación del cliente.",
+      parsed.error.issues
+    );
+    return null;
+  }
+  const explanation = parsed.data;
   return {
-    text: dto.text,
-    classes: dto.classes,
-    model: dto.model,
-    generatedAt: dto.generated_at,
-    disclaimer: dto.disclaimer,
+    text: explanation.text,
+    classes: explanation.classes,
+    model: explanation.model,
+    promptVersion: explanation.prompt_version ?? null,
+    generatedAt: explanation.generated_at,
+    disclaimer: explanation.disclaimer,
   };
 }
 
