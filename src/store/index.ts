@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 
 import { articlesApi } from "@/store/services/articles.api";
+import { classifierApi } from "@/store/services/classifier.api";
 import preferencesReducer from "@/store/slices/preferences.slice";
 
 export function makeStore() {
@@ -8,9 +9,13 @@ export function makeStore() {
     reducer: {
       preferences: preferencesReducer,
       [articlesApi.reducerPath]: articlesApi.reducer,
+      [classifierApi.reducerPath]: classifierApi.reducer,
     },
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(articlesApi.middleware),
+      getDefaultMiddleware().concat(
+        articlesApi.middleware,
+        classifierApi.middleware
+      ),
   });
 }
 

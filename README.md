@@ -6,14 +6,17 @@ colombianas”** (Universidad del Valle). Renderiza noticias paginadas y, para
 cada una, la **clase ideológica predicha** y la **distribución de probabilidad
 sobre las 8 clases** (salida softmax del clasificador).
 
-> **Estado actual:** la API real (IdeoGraphCO-BE) aún no existe, así que el
-> frontend consume rutas mock (`src/app/api`) con datos de demostración.
-> Medios, autores y clasificaciones son ficticios.
+> **Estado actual:** el listado, la búsqueda y el detalle consumen
+> IdeoGraphCO-BE (contrato v2: `GET /api/v1/stories`, ver `CONTRACT.md` en
+> ese repo): noticias reales de medios colombianos, de las que se muestra
+> título, snippet, enlace al original y clasificación. La mesa de redacción
+> clasifica con el mismo backend (`POST /api/v1/classify`).
 
 ## Stack
 
 - **Next.js 15** (App Router, TypeScript, Turbopack)
 - **Tailwind CSS v4 + shadcn/ui** — un solo sistema de estilos
+- **Zod** para validar en el cliente lo que redacta la IA
 - **Redux Toolkit + RTK Query** — estado global y capa de datos (sin Context propio)
 - **next/font** — Inter (UI), Lora (titulares), Geist Mono (código)
 
@@ -26,6 +29,18 @@ yarn build      # build de producción
 yarn lint
 ```
 
+Necesita IdeoGraphCO-BE corriendo (ver su README:
+`uvicorn src.api.app:app --port 8000`). Variables, p. ej. en `.env.local`:
+
+| Variable | Sin definir | Uso |
+|---|---|---|
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8000/api/v1` | Listado, búsqueda y detalle |
+| `NEXT_PUBLIC_CLASSIFIER_API_URL` | léxico de demostración | Mesa de redacción |
+
+Ambas son la raíz versionada del backend (terminan en `/api/v1`). El BE solo
+acepta los orígenes de su `CORS_ORIGINS` (por defecto
+`http://localhost:3000`): si el FE corre en otro puerto, agrégalo allí.
+
 ## Estructura
 
 ```
@@ -34,8 +49,7 @@ src/
 │   ├── page.tsx               # Portada: noticias paginadas (?pagina=N)
 │   ├── noticia/[slug]/        # Detalle + panel de análisis ideológico
 │   ├── fuentes/[categoria]/   # Filtro por categoría de fuente (7 categorías)
-│   ├── buscar/                # Búsqueda (?q=…&pagina=N)
-│   └── api/articles/          # ⚠ MOCK de IdeoGraphCO-BE (listado + detalle)
+│   └── buscar/                # Búsqueda (?q=…&pagina=N)
 ├── components/
 │   ├── pages/                 # Composición de cada página (patrón del repo de referencia)
 │   ├── articles/              # Cards, grid, paginación
@@ -46,12 +60,14 @@ src/
 │   ├── feedback/              # Estados de error / vacío
 │   └── ui/                    # shadcn/ui (generado)
 ├── store/                     # Redux Toolkit
-│   ├── services/articles.api.ts    # RTK Query (getArticles, getArticleBySlug)
+│   ├── services/articles.api.ts    # RTK Query (getArticles, getArticleBySlug → /stories del BE)
+│   ├── services/classifier.api.ts  # RTK Query (classifyText, getHealth, saveExplanationReview)
 │   └── slices/preferences.slice.ts # Tema claro/oscuro
+├── hooks/useExplanationStream.ts  # Explicación en vivo: POST /explain leído como SSE
+├── schemas/explanation.ts     # Zod: eventos del stream, explicación y ficha de revisión
 ├── adapters/                  # DTO (snake_case) → modelo de UI (camelCase)
-├── types/                     # ideology.ts (8 clases), article.ts (DTOs + modelos)
-├── mocks/                     # Dataset de demostración + "base de datos" en memoria
-└── lib/                       # site.ts (metadatos), format.ts (fechas/porcentajes)
+├── types/                     # ideology.ts (8 clases), article.ts (DTOs del contrato v2 + modelos)
+└── lib/                       # site.ts (metadatos), format.ts (fechas/porcentajes), sse.ts (lector SSE)
 ```
 
 ## Flujo de datos
@@ -59,19 +75,79 @@ src/
 ```
 Componente de página ("use client")
         ↓ hook RTK Query (useGetArticlesQuery / useGetArticleBySlugQuery)
-/api/articles (mock, misma forma que tendrá IdeoGraphCO-BE)
-        ↓ PaginatedDTO<ArticleDTO> (snake_case)
+IdeoGraphCO-BE: GET /api/v1/stories · GET /api/v1/stories/{slug}
+        ↓ PaginatedStoriesDTO / StoryDetailDTO (snake_case, src/schemas/dto.py)
 adapters/article.adapter.ts (transformResponse)
-        ↓ Paginated<Article> (camelCase)
-UI (cards, distribución ideológica, paginación)
+        ↓ Paginated<Article> / ArticleDetail (camelCase)
+UI (cards, distribución ideológica, cobertura por fuente, paginación)
 ```
 
-### Conectar la API real
+La búsqueda (`/buscar`) usa el `q` del backend (título, subtítulo y medio,
+sin tildes ni mayúsculas). En `/noticias`, los filtros y la paginación los
+resuelve el backend: cada cambio de filtro o de página es una petición a
+`GET /stories` con `page`, `page_size=9`, `source_category`, `ideology` (una
+clave por cada sello marcado) y `published_from`/`published_to`. El contador
+y las páginas salen de `totalItems`/`totalPages`, así que recorren todo el
+corpus. El rango de fechas usa días del navegador: el FE envía en UTC el
+instante de las 00:00 del «desde» y el de las 23:59:59,999 del «hasta».
+Con filtros activos, el contador dice «N de M noticias»; M es el total de la
+página 1 sin filtros, la misma consulta (y la misma caché) de la vista sin
+filtros.
 
-1. Define `NEXT_PUBLIC_API_URL` (p. ej. `https://api.ideographco.dev/v1`).
-2. Asegura que el backend devuelva los DTOs de `src/types/article.ts`
-   (o ajusta solo `src/adapters/article.adapter.ts`).
-3. Borra `src/app/api/articles` y `src/mocks/`.
+### Detalle de una noticia
+
+Sigue las reglas de renderizado del `CONTRACT.md` del BE. La lectura es
+`synthesized.body`, siempre con su `disclaimer` visible, si la story tiene
+síntesis; si no, el snippet del primer medio en reportar y el botón «Leer en
+{medio}» hacia el original (el público nunca ve el cuerpo completo). Con más
+de una fuente, la sección *Cobertura* lista cada medio con su propia
+clasificación, o «Clasificación pendiente». El panel lateral muestra la
+clasificación del artículo representativo.
+
+### Mesa de redacción con el modelo real
+
+La mesa de redacción (`ClassifierDesk`) clasifica con el modelo del trabajo
+de grado si se define `NEXT_PUBLIC_CLASSIFIER_API_URL` (p. ej.
+`http://localhost:8000/api/v1`): llama a `POST /classify` de IdeoGraphCO-BE,
+que reenvía el texto al servicio de inferencia y no guarda nada. Si el BE
+tiene `GEMINI_API_KEY`, antes pasa el texto por el filtro de politicidad de
+la ingesta, y si este dice que no es una noticia política colombiana (422
+`not_political`) la mesa lo explica en vez de clasificar. Sin clave, el BE
+confía en el usuario y clasifica todo texto.
+Sin la variable usa el léxico de demostración del navegador, y cada veredicto
+declara cuál de los dos lo emitió. Va aparte de `NEXT_PUBLIC_API_URL` porque
+depende del servicio de inferencia; normalmente las dos apuntan al mismo
+backend.
+
+### Explicación en vivo y ficha de revisión
+
+Si el BE la tiene activa (`GET /health` responde `desk_explanations: true`,
+ver `DESK_EXPLANATION_MODE` en su README), bajo un veredicto del modelo la
+mesa ofrece "Explicar esta clasificación". El BE vuelve a clasificar el texto
+y transmite la explicación por Server-Sent Events mientras la IA la escribe
+(`POST /api/v1/explain`; contrato en el `CONTRACT.md` del BE).
+
+- **Lectura del stream** (`src/hooks/useExplanationStream.ts`): `EventSource`
+  solo hace GET, así que el stream se lee con `fetch` y `src/lib/sse.ts`. El
+  párrafo crece con cada `delta`; un `retry` lo borra y dice qué regla rompió
+  el borrador; "Detener" (o salir de la página) aborta la petición y el BE
+  mata el proceso de la IA.
+- **Validación en el cliente** (`src/schemas/explanation.ts`, Zod): cada evento
+  se valida al llegar. La explicación final solo se muestra si trae 1 o 2 de
+  las 8 clases, la primera es la del veredicto, califica el apoyo de cada una
+  (alto, medio o bajo), tiene entre 40 y 125 palabras y no usa la palabra
+  «confianza» ni porcentajes. Un evento que no cumple corta el stream. La
+  explicación guardada del detalle de cada noticia pasa por el mismo esquema
+  en el adapter: si no cumple, no se muestra.
+- **Ficha de revisión** (`ExplanationReviewForm`): cuando la explicación es
+  válida, una ficha llega prellenada con su salida estructurada (el apoyo que
+  la IA le da a cada clase y el párrafo, editables). Quien revisa dice si se
+  ajusta al texto y si el lenguaje es neutral y la guarda
+  (`POST /api/v1/explanation-reviews`). Zod la valida antes de enviarla, con
+  el error junto a cada campo, y el BE la vuelve a validar.
+
+Como la explicación del detalle, se muestra siempre con su rótulo y nunca como
+el razonamiento del clasificador.
 
 ## Las 8 clases ideológicas
 
@@ -79,8 +155,8 @@ Cuatro pares opuestos, alineados con `src.core.schema` del pipeline de ML:
 
 | Clase | Opuesto |
 |-------|---------|
-| Personalismo | Institucionalismo |
-| Populismo | Doctrinarismo |
+| Populismo | Institucionalismo |
+| Personalismo | Doctrinarismo |
 | Soberanismo | Globalismo |
 | Conservadurismo | Progresismo |
 
@@ -100,6 +176,6 @@ va acompañada de su etiqueta de texto.
   `src/adapters/`.
 - **Redux en lugar de Context**: el tema y la capa de datos viven en el store;
   RTK Query maneja caché, revalidación y estados de carga.
-- **Mock API como route handlers**: el frontend ya consume HTTP real
-  (paginación, filtros y 404 incluidos), de modo que el cambio a la API real
-  es solo de URL.
+- **Imágenes remotas**: `next/image` acepta cualquier host
+  (`next.config.ts`), porque las fotos vienen de los medios del corpus y de
+  sus CDN.

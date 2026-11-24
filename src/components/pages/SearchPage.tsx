@@ -33,7 +33,7 @@ export function SearchPage() {
           initialQuery={query}
           size="hero"
           className="max-w-2xl motion-safe:animate-fade-up motion-safe:[animation-delay:100ms]"
-          placeholder="Título, subtítulo, medio o palabra clave…"
+          placeholder="Título, subtítulo o medio…"
         />
         {query && (
           <p aria-live="polite" className="font-mono text-sm text-muted-foreground">
@@ -52,7 +52,7 @@ export function SearchPage() {
         {!query && (
           <EmptyState
             title="Escribe un término para buscar"
-            description="Puedes buscar por título, subtítulo, nombre del medio o palabras clave."
+            description="Puedes buscar por título, subtítulo o nombre del medio."
           />
         )}
 

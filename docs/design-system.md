@@ -59,6 +59,9 @@ Neutros OKLCH con matiz cálido de papel/grafito (hue 75-85, chroma ≤ 0.014):
   se validó la paleta), tarjetas L=0.196, nunca negro puro.
 - `--primary` = tinta (invertida en oscuro). `--destructive` reservado a error.
 - Paleta ideológica: intocable, definida en `:root`/`.dark` (globals.css).
+- Rampa de calor (`--heat-0` … `--heat-4`, `.heat-ramp`): solo para el mapa de
+  calor. Codifica probabilidad, no clase (frío = 0 %, cálido = 100 %, en escala
+  de raíz cuadrada), y siempre va con la cifra escrita y la altura o el radio.
 
 Superficies de navegador tematizadas (firma barata que los templates omiten):
 `::selection` invertido (tinta sobre papel ↔ papel sobre tinta), `caret-color`
@@ -89,7 +92,13 @@ de tinta, scrollbar fino con thumb de borde.
 4. **Ejes de tensión**: los 4 pares opuestos como filas tipográficas gigantes
    enfrentadas sobre un eje hairline (sección propia de la landing y ficha del
    detalle).
-5. **Cifras que respiran**: contadores y porcentajes en mono con entrada
+5. **Mapa de calor 3D** (`IdeologyHeatmap` → `IdeologyTerrain`, three.js):
+   relieve de la noticia con una colina por clase frente a su opuesta; altura y
+   color = raíz de la probabilidad, curvas de nivel en 5, 12,5, 25 y 50 %. Se
+   recorre girando (arrastre con inercia, Ctrl/⌘ + rueda o pinza para acercar)
+   y fijar una clase lleva la cámara hasta ella. Dibujo bajo demanda; sin
+   WebGL cae a la vista cenital 2D (`IdeologyRadial`).
+6. **Cifras que respiran**: contadores y porcentajes en mono con entrada
    animada (motivada: son la medición, no decoración).
 
 ## 6. Movimiento
@@ -118,4 +127,5 @@ completo con reduced motion. Solo `transform/opacity/clip-path/color`.
 Rutas, IA, copy funcional, Redux/RTK Query/adapters/tipos, script anti-FOUC,
 paleta ideológica y su orden CVD, primitivos shadcn como base de Radix (re-tematizados
 por token). Dependencias nuevas permitidas: `motion` (micro-interacciones y
-reveals) y `lenis` (scroll suave con opt-out por reduced-motion).
+reveals), `lenis` (scroll suave con opt-out por reduced-motion) y `three`
+(solo el mapa de calor 3D, cargado bajo demanda).

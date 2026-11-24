@@ -77,7 +77,7 @@ export function MethodSection() {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <IdeologyBadge ideologyClass="soberanismo" size="md" />
               <p className="font-mono text-sm tabular-nums text-muted-foreground">
-                confianza 31 %
+                31,0 % de probabilidad
               </p>
             </div>
             <IdeologyStrip

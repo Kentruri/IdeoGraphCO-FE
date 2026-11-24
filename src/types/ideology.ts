@@ -19,12 +19,16 @@ export type IdeologyClass = (typeof IDEOLOGY_CLASSES)[number];
 /** Distribución de probabilidad softmax: 8 floats que suman 1. */
 export type IdeologyDistribution = Record<IdeologyClass, number>;
 
-/** Pares opuestos declarados en el anteproyecto (4 ejes teóricos). */
+/**
+ * Pares opuestos declarados en el anteproyecto (4 ejes teóricos, §5.3).
+ * Espejo de `src.core.schema.OPPOSITE_PAIRS` del pipeline de ML: mismo
+ * emparejamiento y mismo orden.
+ */
 export const OPPOSITE_PAIRS: ReadonlyArray<
   readonly [IdeologyClass, IdeologyClass]
 > = [
-  ["personalismo", "institucionalismo"],
-  ["populismo", "doctrinarismo"],
+  ["populismo", "institucionalismo"],
+  ["personalismo", "doctrinarismo"],
   ["soberanismo", "globalismo"],
   ["conservadurismo", "progresismo"],
 ];
